@@ -8,6 +8,8 @@ import UserProfile from "@/pages/UserProfile.vue";
 import TableList from "@/pages/TableList.vue";
 import Typography from "@/pages/Typography.vue";
 import UpgradeToPRO from "@/pages/UpgradeToPRO.vue";
+import Product from "@/pages/TableListData/product.vue";
+import Order from "@/pages/TableListData/order.vue";
 
 const routes = [
   {
@@ -54,6 +56,16 @@ const routes = [
         path: "upgradeToPro",
         name: "Upgrade to PRO",
         component: UpgradeToPRO,
+      },
+      {
+        path: "product",
+        name: "Manager Product",
+        component: Product,
+      },
+      {
+        path: "order",
+        name: "Manager Order",
+        component: Order,
       },
     ],
   },
