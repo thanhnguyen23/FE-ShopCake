@@ -10,8 +10,16 @@ import Typography from "@/pages/Typography.vue";
 import UpgradeToPRO from "@/pages/UpgradeToPRO.vue";
 import Product from "@/pages/TableListData/product.vue";
 import Order from "@/pages/TableListData/order.vue";
+import Category from "@/pages/TableListData/category.vue";
+import Promotions from "@/pages/TableListData/promotions.vue";
+import Login from "@/pages/login.vue";
 
 const routes = [
+  {
+    path: "/login",
+    name: "Login",
+    component: Login,
+  },
   {
     path: "/",
     component: DashboardLayout,
@@ -66,6 +74,16 @@ const routes = [
         path: "order",
         name: "Manager Order",
         component: Order,
+      },
+      {
+        path: "category",
+        name: "Manager Category",
+        component: Category,
+      },
+      {
+        path: "promotions",
+        name: "Manager Promotions",
+        component: Promotions,
       },
     ],
   },

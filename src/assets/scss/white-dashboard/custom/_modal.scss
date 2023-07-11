@@ -163,3 +163,8 @@
     margin: 0px 25px 20px;
   }
 }
+.model-detail .modal-dialog {
+  max-width: 1200px;
+  max-height: 400px;
+  overflow-x: auto;
+}

@@ -3,13 +3,13 @@
         <div class="filter d-flex justify-content-between">
             <div class="d-flex">
                 <div class="detail">
-                    <input type="text" class="form-control" placeholder="Search name promotions..." v-model="searchData.name" />
+                    <input type="text" class="form-control" placeholder="Search user name..." v-model="searchData.name" />
                 </div>
             </div>
             <div class="d-flex">
                 <div class="detail">
                     <button type="button" class="form-control" style="background: #28a745;"
-                        @click="showModalDataDetail()">Tạo mã giảm giá</button>
+                        @click="showModalDataDetail()">Tạo thể loại</button>
                 </div>
                 <div class="detail">
                     <button type="button" class="form-control" @click="getAll()">Lọc dữ liệu</button>
@@ -28,9 +28,7 @@
                         <tr v-for="(item, index) in list_data" :key="index">
                             <td>{{ item.id }}</td>
                             <td>{{ item.name }}</td>
-                            <td>{{ item.discount }}</td>
-                            <td>{{ item.startDate }}</td>
-                            <td>{{ item.endDate }}</td>
+                            <td>{{ item.description }}</td>
                             <td class="operation">
                                 <span @click="showModalDataDetail(index)">
                                     <i class="tim-icons icon-pencil"></i>
@@ -54,17 +52,9 @@
                     <input type="text" class="form-control" v-model="dataShowDetail.name" />
                 </div>
                 <div class="content">
-                    <label for="" class="control-label">discount</label>
-                    <input type="number" class="form-control" v-model="dataShowDetail.discount" />
-                </div>
-                <div class="content">
-                    <label for="" class="control-label">Start Date</label>
-                    <input type="datetime-local" class="form-control" v-model="dataShowDetail.startDate" />
-                </div>
-                <div class="content">
-                    <label for="" class="control-label">End Date</label>
-                    <input type="datetime-local" class="form-control" v-model="dataShowDetail.endDate" />
-                </div>
+                        <label for="" class="control-label">Desription</label>
+                        <input type="text" class="form-control" v-model="dataShowDetail.description" />
+                    </div>
                 <div class="content" style="display: inline-block;align-self: flex-end;">
                     <button type="button" class="form-control" style="background: #28a745;color: white;"
                         @click="createdItem()">Save</button>
@@ -85,9 +75,8 @@ import {
 import BaseTable from "@/components/BaseTable";
 import Modal from "@/components/Modal.vue";
 import Paginate from "./paginate.vue";
-import moment from 'moment';
 
-const tableColumns = ["Id", "Name", "Discount", "Start Date", "End Date"];
+const tableColumns = ["Id", "Name", "Desription"];
 
 export default {
     components: {
@@ -107,11 +96,9 @@ export default {
             tableColumns: tableColumns,
             list_data: [],
             dataShowDetail: {
-                id: 0,
+                id: null,
                 name: null,
-                discount: null,
-                startDate: null,
-                endDate: null,
+                description: null,
             },
             pagination: {
                 path: "",
@@ -137,7 +124,7 @@ export default {
     },
     methods: {
         getAll() {
-            this.axios.post('/api/promotions/getAll', this.searchData)
+            this.axios.post('/api/category/getAll', this.searchData)
                 .then(response => {
                     if (response.data.data != null) {
                         this.pagination.total = response.data.data.totalItems;
@@ -175,26 +162,20 @@ export default {
                 this.dataShowDetail = {
                     id: this.list_data[index].id,
                     name: this.list_data[index].name,
-                    discount: this.list_data[index].discount,
-                    startDate: this.list_data[index].startDate,
-                    endDate: this.list_data[index].endDate,
+                    description: this.list_data[index].description,
                 }
             } else {
                 this.dataShowDetail = {
                     id: 0,
                     name: null,
-                    discount: null,
-                    startDate: null,
-                    endDate: null,
+                    description: null,
                 }
             }
         },
         createdItem() {
-            this.dataShowDetail.startDate = moment(this.dataShowDetail.startDate).format('YYYY-DD-MM hh:mm');
-            this.dataShowDetail.endDate = moment(this.dataShowDetail.endDate).format('YYYY-DD-MM hh:mm');
-
+            console.log(this.dataShowDetail);
             if (this.dataShowDetail.id == 0) {
-                this.axios.post('/api/promotions/create', this.dataShowDetail, this.config)
+                this.axios.post('/api/category/create', this.dataShowDetail, this.config)
                     .then(res => {
                         alert('Thêm thành công');
                     })
@@ -202,7 +183,7 @@ export default {
                         console.log(error);
                     });
             } else {
-                this.axios.post(`/api/promotions/update/${this.dataShowDetail.id}`, this.dataShowDetail, this.config)
+                this.axios.post(`/api/category/update/${this.dataShowDetail.id}`, this.dataShowDetail, this.config)
                     .then(res => {
                         alert('Chỉnh sửa thành công');
                     })
@@ -212,7 +193,7 @@ export default {
             }
         },
         deleteItem(id) {
-            this.axios.get(`/api/promotions/delete/${id}`, this.config)
+            this.axios.get(`/api/category/delete/${id}`, this.config)
                 .then(res => {
                     alert('Xóa thành công');
                 })
@@ -317,5 +298,4 @@ table tbody td {
 .file-input__label svg {
     height: 16px;
     margin-right: 4px;
-}
-</style>
+}</style>

@@ -1,58 +1,98 @@
 <template>
     <div class="content">
-        <div class="row">
+        <div class="filter">
+            <div class="detail">
+                <input type="text" class="form-control" placeholder="Search email..." />
+            </div>
+            <div class="detail">
+                <input type="datetime-local" class="form-control" v-model="searchData.fromDate" />
+            </div>
+            <div class="detail">
+                <input type="datetime-local" class="form-control" v-model="searchData.toDate" />
+            </div>
+            <div class="detail">
+                <select name="" id="" class="form-control" v-model="searchData.status">
+                    <option :value="null">Tất cả đơn</option>
+                    <option :value="1">Đơn mới</option>
+                    <option :value="2">Đơn đã xác nhận</option>
+                    <option :value="3">Đơn đang giao</option>
+                    <option :value="4">Đơn hoàn thành</option>
+                    <option :value="5">Đơn đã hủy</option>
+                </select>
+            </div>
+            <div class="detail">
+                <button type="button" class="form-control" @click="getAll()">Lọc dữ liệu</button>
+            </div>
+        </div>
+        <div class="row mt-3">
             <div class="col-12">
-                <table class="table table-striped table-hover" style="width:100%">
+                <table class="table table-striped table-bordered table-hover" style="width:100%">
                     <thead>
                         <tr>
                             <th v-for="(item, index) in tableColumns" :key="index">{{ item }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(item, index) in tableData" :key="index">
+                        <tr v-for="(item, index) in list_data" :key="index">
                             <td>{{ item.id }}</td>
-                            <td>{{ item.user_name }}</td>
-                            <td>{{ item.product_name }}</td>
-                            <td>{{ item.price_product }}</td>
-                            <td>{{ item.user_request }}</td>
-                            <td>{{ item.delivery_date }}</td>
-                            <td>{{ item.quantity }}</td>
-                            <td>{{ item.incurred }}</td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.email }}</td>
+                            <td>{{ item.orderCode }}</td>
+                            <td>{{ item.deliveryAddress }}</td>
+                            <td>{{ item.phone }}</td>
+                            <td>{{ item.deliveryDate }}</td>
                             <td class="operation">
-                                <span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15">
-                                        <title>pen</title>
-                                        <g stroke-width="1" fill="#212121" stroke="#212121">
-                                            <path fill="none" stroke-linecap="round" stroke-linejoin="round"
-                                                d="M10 2.5l2.5 2.5"></path>
-                                            <path d="M5 12.5l8.85-8.81a1.79 1.79 0 1 0-2.54-2.54l-8.81 8.85-1.87 4.38z"
-                                                fill="none" stroke="#212121" stroke-linecap="round" stroke-linejoin="round">
-                                            </path>
-                                        </g>
-                                    </svg>
-                                </span>
-                                <span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                        <title>trash-can</title>
-                                        <rect data-element="frame" x="0" y="0" width="24" height="24" rx="5" ry="5"
-                                            stroke="none" fill="white"></rect>
-                                        <g transform="translate(4.800000000000001 4.800000000000001) scale(0.6)"
-                                            stroke-width="2" fill="#212121" stroke="#212121">
-                                            <path d="M20,9l-.867,12.142A2,2,0,0,1,17.138,23H6.862a2,2,0,0,1-1.995-1.858L4,9"
-                                                fill="none" stroke="#212121" stroke-linecap="square" stroke-miterlimit="10">
-                                            </path>
-                                            <line x1="1" y1="5" x2="23" y2="5" fill="none" stroke-linecap="square"
-                                                stroke-miterlimit="10"></line>
-                                            <path d="M8,5V1h8V5" fill="none" stroke-miterlimit="10"></path>
-                                        </g>
-                                    </svg>
+                                <span @click="showModalDataDetail(item.id)">
+                                    <i class="tim-icons icon-zoom-split"></i>
                                 </span>
                             </td>
+                            <td v-html="checkStatusItem(item.status)"></td>
+                            <td v-if="item.status == 1">
+                                <span class="badge badge-primary" style="cursor: pointer;" @click="updateStatusOrder(item.id, 'xác nhận')">Nhận đơn</span> <span class="badge badge-danger" style="cursor: pointer;" @click="updateStatusOrder(item.id, 'từ chối')">Hủy đơn</span>
+                            </td>
+                            <td v-if="item.status == 2">
+                                <span class='badge badge-info' style="cursor: pointer;" @click="updateStatusOrder(item.id, 'vận chuyển')">Xác nhận giao hàng</span>
+                            </td>
+                            <td v-if="item.status == 3">
+                                <span class='badge badge-success' style="cursor: pointer;" @click="updateStatusOrder(item.id, 'hoàn thành')">Xác nhận Hoàn thành</span>
+                            </td>
+                            <td v-if="item.status == 4">
+                                <span class='badge badge-success' style="cursor: pointer;">Đơn đã hoàn thành</span>
+                            </td>
+                            <td v-if="item.status == 5">
+                                <span class='badge badge-secondary' style="cursor: pointer;" disabled>Đã hủy</span>
+                            </td>
+                        </tr>
+                        <tr v-if="list_data.length < 1">
+                            <td colspan="10">Không có dữ liệu</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <Paginate :total-pages="pagination.total_page" :total="pagination.total" :per-page="pagination.per_page"
+            :current-page="pagination.current_page" @pagechanged="onPageChange"></Paginate>
+
+        <modal :show.sync="searchModalVisible" class="model-detail" id="editItem" :centered="false" :show-close="true">
+            <div class="show-data-detail">
+                <table class="table table-striped table-bordered table-hover" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th v-for="(item, index) in tableColumns_dataDetail" :key="index">{{ item }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in dataShowDetail" :key="index">
+                            <td>{{ item.nameCake }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.image }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </modal>
     </div>
 </template>
 
@@ -62,90 +102,197 @@ import {
 } from "@/components/index";
 
 import BaseTable from "@/components/BaseTable";
+import Modal from "@/components/Modal.vue";
+import Paginate from "./paginate.vue";
+import moment from 'moment';
 
-const tableColumns = ["Id", "User Name", "Product Name", "Price Product", "User Request", "Delivery Date", "Quantity", "Incurred", "Operation"];
-const tableData = [{
-    id: 1,
-    user_name: "Dakota Rice",
-    product_name: "DIEN THOAI THONG MINH IP12 PROMAX",
-    price_product: "$36.738",
-    user_request: "Yêu cầu quán làm thêm ngày tháng năm sinh",
-    delivery_date: "23-08-2005",
-    quantity: "10",
-    incurred: "No",
-},
-{
-    id: 2,
-    user_name: "Dakota Rice",
-    product_name: "DIEN THOAI THONG MINH IP12 PROMAX",
-    price_product: "$36.738",
-    user_request: "Yêu cầu quán làm thêm ngày tháng năm sinh",
-    delivery_date: "23-08-2005",
-    quantity: "10",
-    incurred: "No",
-},
-{
-    id: 3,
-    user_name: "Dakota Rice",
-    product_name: "DIEN THOAI THONG MINH IP12 PROMAX",
-    price_product: "$36.738",
-    user_request: "Yêu cầu quán làm thêm ngày tháng năm sinh",
-    delivery_date: "23-08-2005",
-    quantity: "10",
-    incurred: "No",
-    },
-{
-    id: 4,
-    user_name: "Dakota Rice",
-    product_name: "DIEN THOAI THONG MINH IP12 PROMAX",
-    price_product: "$36.738",
-    user_request: "Yêu cầu quán làm thêm ngày tháng năm sinh",
-    delivery_date: "23-08-2005",
-    quantity: "10",
-    incurred: "No",
-    },
-{
-    id: 5,
-    user_name: "Dakota Rice",
-    product_name: "DIEN THOAI THONG MINH IP12 PROMAX",
-    price_product: "$36.738",
-    user_request: "Yêu cầu quán làm thêm ngày tháng năm sinh",
-    delivery_date: "23-08-2005",
-    quantity: "10",
-    incurred: "No",
-    },
-{
-    id: 6,
-    user_name: "Dakota Rice",
-    product_name: "DIEN THOAI THONG MINH IP12 PROMAX",
-    price_product: "$36.738",
-    user_request: "Yêu cầu quán làm thêm ngày tháng năm sinh",
-    delivery_date: "23-08-2005",
-    quantity: "10",
-    incurred: "No",
-},
-];
+const tableColumns = ["Id", "User Name", "Email", "Order Code", "Delivery Address", "phone", "deliveryDate", "Detail", "status", "Hành động"];
+const tableColumns_dataDetail = ["Product Name", "Quantity", "Price", "Image"];
 
 export default {
     components: {
         Card,
         BaseTable,
+        Modal,
+        Paginate,
     },
     data() {
         return {
+            searchModalVisible: false,
             tableColumns: tableColumns,
-            tableData: tableData,
+            tableColumns_dataDetail: tableColumns_dataDetail,
+            list_data: [],
+            dataShowDetail: [],
+            searchData: {
+                search_name: null,
+                size: 10,
+                page: 1,
+                userId: 1,
+                status: null,
+                fromDate: null,
+                toDate: null
+            },
+            pagination: {
+                total: 0,
+                current_page: 1,
+                per_page: 8,
+                total_page: 0,
+            },
+            config: {
+                headers: {
+                    Authorization: 'Bearer ' + JSON.parse(localStorage.getItem('user')).accessToken,
+                },
+            },
         };
+    },
+    mounted() {
+        if (!this.$store.state.auth.status.loggedIn) {
+            this.$router.push('/login');
+        }
+    },
+    methods: {
+        getAll() {
+            if (this.searchData.fromDate != null) {
+                this.searchData.fromDate = moment(this.searchData.fromDate).format('YYYY-DD-MM hh:mm');
+            }
+            if (this.searchData.toDate != null) {
+                this.searchData.toDate = moment(this.searchData.toDate).format('YYYY-DD-MM hh:mm');
+            }
+
+            this.axios.post('/api/order/getAll', this.searchData, this.config)
+            .then(response  => {
+                if (response.data.data != null) {
+                    this.pagination.total = response.data.data.totalItems;
+                    this.pagination.current_page = response.data.data.pageNumber;
+                    this.pagination.per_page = response.data.data.pageSize;
+                    this.pagination.total_page = response.data.data.totalPages;
+                    this.searchData.size = response.data.data.pageSize;
+                    this.list_data = response.data.data.result;
+                } else {
+                    this.pagination.total = 0;
+                    this.pagination.current_page = 0;
+                    this.pagination.per_page = this.searchData.size;
+                    this.pagination.total_page = 0;
+                    this.searchData.size = this.searchData.size;
+                    this.list_data = [];
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        },
+        getDataDetail(id) {
+            this.axios.get(`/api/order/findById/${id}`)
+            .then(response => {
+                this.dataShowDetail = response.data.data;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        },
+        updateStatusOrder(id ,status) {
+            this.axios.post(`/api/order/procedure/${id}`, {procedure: `${status}`}, this.config)
+                .then(response => {
+                    alert("chuyển trạng thái thành công");
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            this.getAll();
+        },
+        checkStatusItem(status) {
+            switch (status) {
+                case 1:
+                    return `<span class='badge badge-light'>Đơn mới</span>`;
+                case 2:
+                    return `<span class='badge badge-primary'>Đã xác nhận</span>`;
+                case 3:
+                    return `<span class='badge badge-info'>Đang giao hàng</span>`;
+                case 4:
+                    return `<span class='badge badge-success'>Hoàn thành</span>`;
+                case 4:
+                    return `<span class='badge badge-secondary'>Đã hủy</span>`;
+            }
+        },
+        checkStatusHandleOrder(status) {
+            switch (status) {
+                case 1:
+                    return `<span class="badge badge-primary" style="cursor: pointer;" @click="updateStatusOrder('xác nhận')">Nhận đơn</span> <span class="badge badge-danger" style="cursor: pointer;" @click="updateStatusOrder('từ chối')">Hủy đơn</span>`;
+                case 3:
+                    return `<span class='badge badge-info' style="cursor: pointer;" @click="updateStatusOrder('vận chuyển')">Xác nhận giao hàng</span>`;
+                case 4:
+                    return `<span class='badge badge-success' style="cursor: pointer;" @click="updateStatusOrder('hoàn thành')">Xác nhận Hoàn thành</span>`;
+                case 4:
+                    return `<span class='badge badge-secondary' style="cursor: pointer;" disabled>Đã hủy</span>`;
+            }
+        },
+        showModalDataDetail(id) {
+            this.searchModalVisible = true;
+            this.getDataDetail(id);
+        },
+        onPageChange(page) {
+            alert(page);
+        }
+    },
+    created() {
+        this.getAll();
     },
 };
 </script>
 
-<style>
-.operation {
-    padding: 0px;
+<style scoped>
+button:focus {
+    outline: none;
 }
+
 .operation span {
     cursor: pointer;
     margin: 0 10px;
 }
+
+.filter {
+    display: flex;
+    background: #dde3e0;
+    padding: 14px;
+    border-radius: 5px;
+}
+
+.filter>.detail {
+    margin: 5px;
+}
+
+.form-control:focus {
+    border-color: rgba(29, 37, 59, 0.5);
+}
+
+.form-control {
+    border-color: rgb(104 115 143 / 50%);
+}
+
+.detail button {
+    white-space: nowrap;
+    background: linear-gradient(0deg, #3358f4 0%, #1d8cf8 100%);
+    color: white;
+    border: none;
+}
+
+table thead th {
+    border: 0.0625rem solid #e3e3e3 !important;
+}
+
+table tbody td {
+    border: 0.0625rem solid #e3e3e3 !important;
+}
+
+
+.control-label {
+    margin: 0px;
+}
+
+
+.show-data-detail {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 </style>

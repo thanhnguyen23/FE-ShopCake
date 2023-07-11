@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar" :data="backgroundColor">
+  <div class="sidebar" style="background: linear-gradient(0deg, #3358f4 0%, #1d8cf8 100%);">
     <div class="sidebar-wrapper text-left">
       <div class="logo">
         <a href="javascript:void(0)" class="simple-text logo-mini">
@@ -41,7 +41,7 @@ export default {
     },
     backgroundColor: {
       type: String,
-      default: "green",
+      default: "blue",
     },
     sidebarLinks: {
       type: Array,

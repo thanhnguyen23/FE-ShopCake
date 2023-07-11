@@ -1,56 +1,130 @@
 <template>
-    <div class="content">
-        <div class="row">
-            <div class="col-12">
-                <table class="table table-striped table-hover" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th v-for="(item, index) in tableColumns" :key="index">{{ item }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(item, index) in tableData" :key="index">
-                            <td>{{ item.id }}</td>
-                            <td>{{ item.name }}</td>
-                            <td>{{ item.salary }}</td>
-                            <td>{{ item.country }}</td>
-                            <td>{{ item.city }}</td>
-                            <td class="operation">
-                                <span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15">
-                                        <title>pen</title>
-                                        <g stroke-width="1" fill="#212121" stroke="#212121">
-                                            <path fill="none" stroke-linecap="round" stroke-linejoin="round"
-                                                d="M10 2.5l2.5 2.5"></path>
-                                            <path d="M5 12.5l8.85-8.81a1.79 1.79 0 1 0-2.54-2.54l-8.81 8.85-1.87 4.38z"
-                                                fill="none" stroke="#212121" stroke-linecap="round" stroke-linejoin="round">
-                                            </path>
-                                        </g>
-                                    </svg>
-                                </span>
-                                <span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                        <title>trash-can</title>
-                                        <rect data-element="frame" x="0" y="0" width="24" height="24" rx="5" ry="5"
-                                            stroke="none" fill="white"></rect>
-                                        <g transform="translate(4.800000000000001 4.800000000000001) scale(0.6)"
-                                            stroke-width="2" fill="#212121" stroke="#212121">
-                                            <path d="M20,9l-.867,12.142A2,2,0,0,1,17.138,23H6.862a2,2,0,0,1-1.995-1.858L4,9"
-                                                fill="none" stroke="#212121" stroke-linecap="square" stroke-miterlimit="10">
-                                            </path>
-                                            <line x1="1" y1="5" x2="23" y2="5" fill="none" stroke-linecap="square"
-                                                stroke-miterlimit="10"></line>
-                                            <path d="M8,5V1h8V5" fill="none" stroke-miterlimit="10"></path>
-                                        </g>
-                                    </svg>
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+<div class="content">
+    <div class="filter d-flex justify-content-between">
+        <div class="d-flex">
+            <div class="detail">
+                <input type="text" class="form-control" placeholder="Search user name..." v-model="searchData.name" />
+            </div>
+            <div class="detail">
+                <input type="number" class="form-control" placeholder="From price" v-model="searchData.priceFrom" />
+            </div>
+            <div class="detail">
+                <input type="number" class="form-control" placeholder="To Price" v-model="searchData.priceTo" />
+            </div>
+        </div>
+        <div class="d-flex">
+            <div class="detail">
+                <button type="button" class="form-control" style="background: #28a745;" @click="showModalDataDetail()">Tạo sản phẩm</button>
+            </div>
+            <div class="detail">
+                <button type="button" class="form-control" @click="getAll()">Lọc dữ liệu</button>
             </div>
         </div>
     </div>
+    <div class="row mt-3">
+        <div class="col-12">
+            <table class="table table-striped table-bordered table-hover" style="width:100%">
+                <thead>
+                    <tr>
+                        <th v-for="(item, index) in tableColumns" :key="index">{{ item }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, index) in list_data" :key="index">
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.name }}</td>
+                        <td style="width: 7%;"><img :src="urlImage + item.image" alt=""></td>
+                        <td>{{ item.title }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ item.ingredient }}</td>
+                        <td>{{ item.size }}</td>
+                        <td>{{ item.note }}</td>
+                        <td class="operation">
+                            <span @click="showModalDataDetail(index)">
+                                <i class="tim-icons icon-pencil"></i>
+                            </span>
+                            <span @click="deleteItem(item.id)">
+                                <i class="tim-icons icon-trash-simple"></i>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr v-if="list_data.length < 1">
+                        <td colspan="8">Không có dữ liệu</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <modal :show.sync="searchModalVisible" class="model-detail" id="editItem" :centered="false" :show-close="true">
+        <div class="show-data-detail">
+            <div class="content">
+                <label for="" class="control-label">Name</label>
+                <input type="text" class="form-control" v-model="dataShowDetail.name" />
+            </div>
+            <div class="content">
+                <label for="" class="control-label">Title</label>
+                <input type="text" class="form-control" v-model="dataShowDetail.title" />
+            </div>
+            <div class="content">
+                <label for="" class="control-label">Price</label>
+                <input type="text" class="form-control" v-model="dataShowDetail.price" />
+            </div>
+            <div class="content">
+                <label for="" class="control-label">Ingredient</label>
+                <input type="text" class="form-control" v-model="dataShowDetail.ingredient" />
+            </div>
+            <div class="content">
+                <label for="" class="control-label">Color</label>
+                <input type="text" class="form-control" v-model="dataShowDetail.color" />
+            </div>
+            <div class="content">
+                <label for="" class="control-label">Decorate</label>
+                <input type="text" class="form-control" v-model="dataShowDetail.decorate" />
+            </div>
+            <div class="content">
+                <label for="" class="control-label">Reason</label>
+                <input type="text" class="form-control" v-model="dataShowDetail.reason" />
+            </div>
+            <div class="content">
+                <label for="" class="control-label">Size</label>
+                <input type="text" class="form-control" v-model="dataShowDetail.size" />
+            </div>
+            <div class="content">
+                <label for="" class="control-label">Category</label>
+                <Multiselect 
+                v-model="dataShowDetail.listCategoryId" 
+                :options="list_categorys"
+                placeholder="Chọn thể loại"
+                label="name"
+                track-by="id"
+                :multiple="true"
+                :close-on-select="false"
+                :clear-on-select="false"
+                :preserve-search="true"
+                :preselect-first="false"
+                >
+                </Multiselect>
+            </div>
+            <div class="content">
+                <label for="" class="control-label">image</label>
+                <input type="file" @change="onFileChange">
+            </div>
+            <div class="content">
+                <p>Ảnh hiện tại</p>
+                <img :src="urlImage + dataShowDetail.current_image" id="preview-image-create">
+            </div>
+            <div class="content" v-if="dataShowDetail.id != 0">
+                <p>Ảnh chỉnh sửa</p>
+                <img src="" alt="" id="preview-image-edit">
+            </div>
+            <div class="content" style="display: inline-block;align-self: flex-end;width: 100%;">
+                <button type="button" class="form-control" style="background: #28a745;color: white;" @click="createdItem()">Save</button>
+            </div>
+        </div>
+    </modal>
+
+    <Paginate :total-pages="pagination.total_page" :total="pagination.total" :per-page="pagination.per_page" :current-page="pagination.current_page" @pagechanged="onPageChange"></Paginate>
+</div>
 </template>
 
 <script>
@@ -59,74 +133,335 @@ import {
 } from "@/components/index";
 
 import BaseTable from "@/components/BaseTable";
+import Modal from "@/components/Modal.vue";
+import Paginate from "./paginate.vue";
+import Multiselect from 'vue-multiselect';
 
-const tableColumns = ["Id", "Name", "Price", "Amount", "Desription", "operation"];
-const tableData = [{
-    id: 1,
-    name: "Dakota Rice",
-    salary: "$36.738",
-    country: "10",
-    city: "Oud-Turnhout",
-},
-{
-    id: 2,
-    name: "Minerva Hooper",
-    salary: "$23,789",
-    country: "20",
-    city: "Sinaai-Waas",
-},
-{
-    id: 3,
-    name: "Sage Rodriguez",
-    salary: "$56,142",
-    country: "6",
-    city: "Baileux",
-},
-{
-    id: 4,
-    name: "Philip Chaney",
-    salary: "$38,735",
-    country: "8",
-    city: "Overland Park",
-},
-{
-    id: 5,
-    name: "Doris Greene",
-    salary: "$63,542",
-    country: "9",
-    city: "Feldkirchen in Kärnten",
-},
-{
-    id: 6,
-    name: "Mason Porter",
-    salary: "$98,615",
-    country: "10",
-    city: "Gloucester",
-},
-{
-    id: 7,
-    name: "Jon Porter",
-    salary: "$78,615",
-    country: "3",
-    city: "Gloucester",
-},
-];
+const tableColumns = ["Id", "Name", "Image", "Title", "Price", "Ingredient", "Desription", "operation"];
 
 export default {
     components: {
         Card,
         BaseTable,
+        Modal,
+        Paginate,
+        Multiselect,
     },
     data() {
         return {
+            urlImage: "http://103.187.5.254:8090/api/files/files/",
+            searchData: {
+                name: null,
+                priceTo: 1000000000000000000,
+                priceFrom: 0,
+                size: 8,
+                page: 1,
+            },
+            searchModalVisible: false,
             tableColumns: tableColumns,
-            tableData: tableData,
+            list_data: [],
+            list_categorys: [],
+            dataShowDetail: {
+                id: null,
+                name: null,
+                price: null,
+                ingredient: null,
+                listCategoryId: [],
+                image: null,
+                title: null,
+                decorate: null,
+                note: null,
+                size: null,
+                color: null,
+                reason: null,
+            },
+            pagination: {
+                path: "",
+                total: 0,
+                current_page: 1,
+                per_page: 8,
+                total_page: 0,
+            },
+            config: {
+                headers: {
+                    Authorization: 'Bearer ' + JSON.parse(localStorage.getItem('user')).accessToken,
+                },
+            },
         };
+    },
+    created() {
+        this.getAll();
+    },
+    mounted() {
+        if (!this.$store.state.auth.status.loggedIn) {
+            this.$router.push('/login');
+        }
+    },
+    methods: {
+        getAll() {
+            this.axios.post('/api/cake/getAll', this.searchData)
+                .then(response => {
+                    if (response.data.data != null) {
+                        this.pagination.total = response.data.data.totalItems;
+                        this.pagination.current_page = response.data.data.pageNumber;
+                        this.pagination.per_page = response.data.data.pageSize;
+                        this.pagination.total_page = response.data.data.totalPages;
+                        this.searchData.size = response.data.data.pageSize;
+                        this.list_data = response.data.data.result;
+                    } else {
+                        this.pagination.total = 0;
+                        this.pagination.current_page = 0;
+                        this.pagination.per_page = this.searchData.size;
+                        this.pagination.total_page = 0;
+                        this.searchData.size = this.searchData.size;
+                        this.list_data = [];
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        getDataDetail(id) {
+            this.axios.get(`/api/cake/findById/${id}`)
+                .then(response => {
+                    this.dataShowDetail = response.data.data;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        showModalDataDetail(index = null) {
+            this.searchModalVisible = true;
+
+            this.axios.post('/api/category/getAll', this.searchData)
+                .then(response => {
+                    this.list_categorys = response.data.data.result;
+                    console.log(this.list_categorys);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            
+            if (index != null) {
+                this.axios.get(`/api/cake/findById/${this.list_data[index].id}`)
+                    .then(response => {
+                        console.log(response.data);
+                    this.dataShowDetail = {
+                        id: response.data.data.id,
+                        name: response.data.data.name,
+                        price: response.data.data.price,
+                        ingredient: response.data.data.ingredient,
+                        listCategoryId: response.data.data.listCategoryId,
+                        current_image: response.data.data.image,
+                        image: response.data.data.image,
+                        title: response.data.data.title,
+                        decorate: response.data.data.decorate,
+                        note: response.data.data.note,
+                        size: response.data.data.size,
+                        color: response.data.data.color,
+                        reason: response.data.data.reason,
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+            } else {
+                this.dataShowDetail = {
+                    id: 0,
+                    name: null,
+                    price: null,
+                    ingredient: null,
+                    listCategoryId: [],
+                    current_image: null,
+                    image: null,
+                    title: null,
+                    decorate: null,
+                    note: null,
+                    size: null,
+                    color: null,
+                    reason: null,
+                }
+            }
+        },
+        createdItem() {
+            if (this.dataShowDetail.image == "" || this.dataShowDetail.image == null) {
+                return;
+            }
+            const formData = new FormData();
+            formData.append("file", this.dataShowDetail.image);
+
+
+            var list_categoryId = "";
+            this.dataShowDetail.listCategoryId.map((item) => {
+                list_categoryId += `${item.id},`;
+            });
+            this.dataShowDetail.listCategoryId = list_categoryId;
+
+            const configUpload = {
+                headers: {
+                    Authorization: 'Bearer ' + JSON.parse(localStorage.getItem('user')).accessToken,
+                    'Content-Type': 'multipart/form-data'
+                },
+            };
+
+            if (this.dataShowDetail.id == 0) {
+                this.axios.post('/api/files/upload', formData, configUpload)
+                    .then(response => {
+                        this.dataShowDetail.image = response.data;
+
+                        this.axios.post('/api/cake/create', this.dataShowDetail, this.config)
+                            .then(res => {
+                                alert('Thêm thành công');
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            } else {
+                this.axios.post('/api/files/upload', formData, configUpload)
+                    .then(response => {
+                        this.dataShowDetail.image = response.data;
+
+                        this.axios.post(`/api/cake/update/${this.dataShowDetail.id}`, this.dataShowDetail, this.config)
+                            .then(res => {
+                                alert('Chỉnh sửa thành công');
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
+            }
+            this.getAll();
+            this.searchModalVisible = false;
+        },
+        deleteItem(id) {
+            this.axios.get(`/api/cake/delete/${id}`, this.config)
+                .then(res => {
+                    alert('Xóa thành công');
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
+        },
+        onFileChange(e) {
+            var files = e.target.files || e.dataTransfer.files;
+            if (!files.length)
+                return;
+
+            if (files && this.dataShowDetail.id != 0) {
+                const image = document.getElementById("preview-image-edit");
+                image.src = URL.createObjectURL(files[0]);
+            }
+            if (this.dataShowDetail.id == 0) {
+                const image = document.getElementById("preview-image-create");
+                image.src = URL.createObjectURL(files[0]);
+            }
+            this.dataShowDetail.image = files[0];
+        },
+        onPageChange(page) {
+            this.searchData.page = page;
+            this.getAll();
+            this.pagination.current_page = page;
+        }
     },
 };
 </script>
 
-<style>.operation span {
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style scoped>
+button:focus {
+    outline: none;
+}
+
+.operation span {
     cursor: pointer;
     margin: 0 10px;
-}</style>
+}
+
+.filter {
+    display: flex;
+    background: #dde3e0;
+    padding: 14px;
+    border-radius: 5px;
+}
+
+.filter .detail {
+    margin: 5px;
+}
+
+.form-control:focus {
+    border-color: rgba(29, 37, 59, 0.5);
+}
+
+.form-control {
+    border-color: rgb(104 115 143 / 50%);
+}
+
+.detail button {
+    white-space: nowrap;
+    background: linear-gradient(0deg, #3358f4 0%, #1d8cf8 100%);
+    color: white;
+    border: none;
+}
+
+table thead th {
+    border: 0.0625rem solid #e3e3e3 !important;
+}
+
+table tbody td {
+    border: 0.0625rem solid #e3e3e3 !important;
+}
+
+.control-label {
+    margin: 0px;
+    font-weight: 600;
+}
+
+.show-data-detail {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.show-data-detail>.content {
+    width: 48%;
+    margin: 1%;
+    text-align: left;
+}
+
+.show-data-detail>.content>input {
+    width: 100%;
+}
+
+.file-input__input {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.file-input__label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #fff;
+    width: 100%;
+    padding: 4.9px 12px;
+    background-color: #4245a8;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.25);
+}
+
+.file-input__label svg {
+    height: 16px;
+    margin-right: 4px;
+}
+</style>

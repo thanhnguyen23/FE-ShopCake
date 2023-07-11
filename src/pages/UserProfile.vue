@@ -15,6 +15,8 @@ import EditProfileForm from "./Profile/EditProfileForm.vue";
 import UserCard from "./Profile/UserCard.vue";
 
 export default {
+  watch: {
+  },
   components: {
     EditProfileForm,
     UserCard,

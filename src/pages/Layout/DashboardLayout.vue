@@ -17,42 +17,6 @@
         </template>
       </sidebar-link>
 
-      <sidebar-link to="/icons">
-        <i class="tim-icons icon-atom"></i>
-
-        <template v-if="!isRTL">
-          <p>Icons</p>
-        </template>
-
-        <template v-else>
-          <p>الرموز</p>
-        </template>
-      </sidebar-link>
-
-      <sidebar-link to="/maps">
-        <i class="tim-icons icon-pin"></i>
-
-        <template v-if="!isRTL">
-          <p>Maps</p>
-        </template>
-
-        <template v-else>
-          <p>خرائط</p>
-        </template>
-      </sidebar-link>
-
-      <sidebar-link to="/notifications">
-        <i class="tim-icons icon-bell-55"></i>
-
-        <template v-if="!isRTL">
-          <p>Notifications</p>
-        </template>
-
-        <template v-else>
-          <p>إخطارات</p>
-        </template>
-      </sidebar-link>
-
       <sidebar-link to="/user">
         <i class="tim-icons icon-single-02"></i>
 
@@ -65,51 +29,34 @@
         </template>
       </sidebar-link>
 
-      <sidebar-link to="/table">
-        <i class="tim-icons icon-puzzle-10"></i>
+      <sidebar-link to="/product">
+          <i class="tim-icons icon-bag-16"></i>
+
+          <template v-if="!isRTL">
+            <p>Manager Product</p>
+          </template>
+        </sidebar-link>
+
+      <sidebar-link to="/order">
+        <i class="tim-icons icon-cart"></i>
 
         <template v-if="!isRTL">
-          <p>Table List</p>
-        </template>
-
-        <template v-else>
-          <p>قائمة الجدول</p>
+          <p>Manager Order</p>
         </template>
       </sidebar-link>
 
-      <sidebar-link to="/typography">
-        <i class="tim-icons icon-align-center"></i>
+      <sidebar-link to="/category">
+        <i class="tim-icons icon-bag-16"></i>
 
         <template v-if="!isRTL">
-          <p>Typography</p>
-        </template>
-
-        <template v-else>
-          <p>طباعة</p>
+          <p>Manager Category</p>
         </template>
       </sidebar-link>
-
-      <sidebar-link to="/dashboard?enableRTL=true">
-        <i class="tim-icons icon-world"></i>
-
-        <template v-if="!isRTL">
-          <p>RTL Support</p>
-        </template>
-
-        <template v-else>
-          <p>دعم RTL</p>
-        </template>
-      </sidebar-link>
-
-      <sidebar-link to="/upgradeToPro" class="active-pro">
-        <i class="tim-icons icon-spaceship"></i>
+      <sidebar-link to="/promotions">
+        <i class="tim-icons icon-bag-16"></i>
 
         <template v-if="!isRTL">
-          <p>Upgrade to PRO</p>
-        </template>
-
-        <template v-else>
-          <p>التطور للاحترافية</p>
+          <p>Manager Promotions</p>
         </template>
       </sidebar-link>
     </side-bar>

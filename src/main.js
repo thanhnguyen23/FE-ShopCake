@@ -31,7 +31,14 @@ import RTLPlugin from "./RTLPlugin";
 import Notify from "@/components/NotificationPlugin";
 import i18n from "./i18n";
 import SideBar from "@/components/SidebarPlugin";
+import VueAxios from 'vue-axios';
+import VeeValidate from 'vee-validate';
+import axios from 'axios';
+import store from './store/index';
 
+// Make BootstrapVue available throughout your project
+
+axios.defaults.baseURL = "http://103.187.5.254:8090";
 Vue.config.productionTip = false;
 
 // router setup
@@ -51,8 +58,11 @@ Vue.use(GlobalDirectives);
 Vue.use(RTLPlugin);
 Vue.use(SideBar);
 Vue.use(Notify);
+Vue.use(VueAxios, axios);
+Vue.use(VeeValidate);
 
 new Vue({
+  store,
   router,
   i18n,
   render: (h) => h(App),
