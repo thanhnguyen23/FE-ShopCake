@@ -4,7 +4,7 @@
         <div class="filter d-flex justify-content-between">
             <div class="d-flex">
                 <div class="detail">
-                    <input type="text" class="form-control" placeholder="Search user name..." v-model="searchData.name" />
+                    <input type="text" class="form-control" placeholder="Search product name..." v-model="searchData.name" />
                 </div>
                 <div class="detail">
                     <input type="number" class="form-control" placeholder="From price" v-model="searchData.priceFrom" />
@@ -144,7 +144,7 @@ import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
 
-const tableColumns = ["Id", "Name", "Image", "Title", "Price", "Ingredient", "Desription", "operation"];
+const tableColumns = ["Id", "Name", "Image", "Title", "Price", "Ingredient", "Size", "Desription", "operation"];
 
 export default {
     components: {
@@ -376,12 +376,13 @@ export default {
             }
         },
         async deleteItem(id) {
-            this.isLoading = true;
             if (confirm("Bạn có chắn chắn muốn xóa bản ghi này không?")) {
+                this.isLoading = true;
                 await this.axios.get(`/api/cake/delete/${id}`, this.config)
                     .then(res => {
                         this.getAll();
                         this.notifyVue('success', 'Xóa thành công');
+                        this.isLoading = false;
                     })
                     .catch(function (error) {
                         console.log(error);

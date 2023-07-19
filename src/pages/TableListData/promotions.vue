@@ -39,8 +39,8 @@
                             <td>{{ item.id }}</td>
                             <td>{{ item.name }}</td>
                             <td>{{ item.discount }}</td>
-                            <td>{{ item.startDate }}</td>
-                            <td>{{ item.endDate }}</td>
+                            <td>{{ momentFormatDate(item.startDate) }}</td>
+                            <td>{{ momentFormatDate(item.endDate) }}</td>
                             <td class="operation">
                                 <span @click="showModalDataDetail(index)">
                                     <i class="tim-icons icon-pencil"></i>
@@ -242,17 +242,19 @@ export default {
             }
         },
         deleteItem(id) {
-            this.isLoading = true;
-            this.axios.get(`/api/promotions/delete/${id}`, this.config)
-                .then(res => {
-                    this.notifyVue('success', 'Xóa thành công');
-                    this.getAll();
-                    this.isLoading = false;
-                })
-                .catch(function (error) {
-                    this.isLoading = false;
-                    console.log(error);
-                });
+            if (confirm("Bạn có chắn chắn muốn xóa bản ghi này không?")) {
+                this.isLoading = true;
+                this.axios.get(`/api/promotions/delete/${id}`, this.config)
+                    .then(res => {
+                        this.notifyVue('success', 'Xóa thành công');
+                        this.getAll();
+                        this.isLoading = false;
+                    })
+                    .catch(function (error) {
+                        this.isLoading = false;
+                        console.log(error);
+                    });
+            }
         },
         notifyVue(color, message) {
             this.$notify({
@@ -264,6 +266,9 @@ export default {
                 timeout: 3000,
                 message: message,
             });
+        },
+        momentFormatDate(date) {
+            return moment(date).format('YYYY-DD-MM hh:mm');
         },
         onPageChange(page) {
             this.searchData.page = page;

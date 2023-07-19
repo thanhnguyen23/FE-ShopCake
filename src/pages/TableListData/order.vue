@@ -50,7 +50,7 @@
                             <td>{{ item.orderCode }}</td>
                             <td>{{ item.deliveryAddress }}</td>
                             <td>{{ item.phone }}</td>
-                            <td>{{ item.deliveryDate }}</td>
+                            <td>{{ momentFormatDate(item.deliveryDate) }}</td>
                             <td class="operation">
                                 <span @click="showModalDataDetail(item.id)">
                                     <i class="tim-icons icon-zoom-split"></i>
@@ -141,7 +141,7 @@ export default {
             dataShowDetail: [],
             searchData: {
                 search_name: null,
-                size: 10,
+                size: 8,
                 page: 1,
                 userId: 1,
                 status: null,
@@ -176,10 +176,10 @@ export default {
             }
             
             if (this.searchData.fromDate != null) {
-                this.searchData.fromDate = moment(this.searchData.fromDate).format('YYYY-DD-MM hh:mm');
+                this.searchData.fromDate = this.momentFormatDate(this.searchData.fromDate);
             }
             if (this.searchData.toDate != null) {
-                this.searchData.toDate = moment(this.searchData.toDate).format('YYYY-DD-MM hh:mm');
+                this.searchData.toDate = this.momentFormatDate(this.searchData.toDate);
             }
 
             this.axios.post('/api/order/getAll', this.searchData, this.config)
@@ -202,7 +202,6 @@ export default {
                 this.isLoading = false;
             })
             .catch(function (error) {
-                this.isLoading = false;
                 console.log(error);
             });
         },
@@ -264,6 +263,9 @@ export default {
                 timeout: 3000,
                 message: message,
             });
+        },
+        momentFormatDate(date) {
+            return moment(date).format('YYYY-DD-MM hh:mm');
         },
         showModalDataDetail(id) {
             this.isLoading = true;

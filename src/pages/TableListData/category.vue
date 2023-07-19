@@ -230,7 +230,8 @@ export default {
             });
         },
         deleteItem(id) {
-            this.axios.get(`/api/category/delete/${id}`, this.config)
+            if (confirm("Bạn có chắn chắn muốn xóa bản ghi này không?")) {
+                this.axios.get(`/api/category/delete/${id}`, this.config)
                 .then(res => {
                     this.notifyVue('success', 'Xóa thành công');
                     this.getAll();
@@ -238,6 +239,7 @@ export default {
                 .catch(function (error) {
                     console.log(error);
                 });
+            }
         },
         onPageChange(page) {
             this.searchData.page = page;
