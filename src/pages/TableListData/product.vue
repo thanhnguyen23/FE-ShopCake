@@ -1,130 +1,134 @@
 <template>
-<div class="content">
-    <div class="filter d-flex justify-content-between">
-        <div class="d-flex">
-            <div class="detail">
-                <input type="text" class="form-control" placeholder="Search user name..." v-model="searchData.name" />
+    <div class="content">
+        <Loading :active.sync="isLoading" :can-cancel="true" :is-full-page="true"></Loading>
+        <div class="filter d-flex justify-content-between">
+            <div class="d-flex">
+                <div class="detail">
+                    <input type="text" class="form-control" placeholder="Search user name..." v-model="searchData.name" />
+                </div>
+                <div class="detail">
+                    <input type="number" class="form-control" placeholder="From price" v-model="searchData.priceFrom" />
+                </div>
+                <div class="detail">
+                    <input type="number" class="form-control" placeholder="To Price" v-model="searchData.priceTo" />
+                </div>
+                <div class="detail">
+                    <select name="" class="form-control" id="" v-model="searchData.size">
+                        <option value="" disabled selected>Select paginate</option>
+                        <option value="8">8</option>
+                        <option value="25">25</option>
+                        <option value="50">8</option>
+                        <option value="75">75</option>
+                    </select>
+                </div>
             </div>
-            <div class="detail">
-                <input type="number" class="form-control" placeholder="From price" v-model="searchData.priceFrom" />
-            </div>
-            <div class="detail">
-                <input type="number" class="form-control" placeholder="To Price" v-model="searchData.priceTo" />
-            </div>
-        </div>
-        <div class="d-flex">
-            <div class="detail">
-                <button type="button" class="form-control" style="background: #28a745;" @click="showModalDataDetail()">Tạo sản phẩm</button>
-            </div>
-            <div class="detail">
-                <button type="button" class="form-control" @click="getAll()">Lọc dữ liệu</button>
-            </div>
-        </div>
-    </div>
-    <div class="row mt-3">
-        <div class="col-12">
-            <table class="table table-striped table-bordered table-hover" style="width:100%">
-                <thead>
-                    <tr>
-                        <th v-for="(item, index) in tableColumns" :key="index">{{ item }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item, index) in list_data" :key="index">
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.name }}</td>
-                        <td style="width: 7%;"><img :src="urlImage + item.image" alt=""></td>
-                        <td>{{ item.title }}</td>
-                        <td>{{ item.price }}</td>
-                        <td>{{ item.ingredient }}</td>
-                        <td>{{ item.size }}</td>
-                        <td>{{ item.note }}</td>
-                        <td class="operation">
-                            <span @click="showModalDataDetail(index)">
-                                <i class="tim-icons icon-pencil"></i>
-                            </span>
-                            <span @click="deleteItem(item.id)">
-                                <i class="tim-icons icon-trash-simple"></i>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr v-if="list_data.length < 1">
-                        <td colspan="8">Không có dữ liệu</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <modal :show.sync="searchModalVisible" class="model-detail" id="editItem" :centered="false" :show-close="true">
-        <div class="show-data-detail">
-            <div class="content">
-                <label for="" class="control-label">Name</label>
-                <input type="text" class="form-control" v-model="dataShowDetail.name" />
-            </div>
-            <div class="content">
-                <label for="" class="control-label">Title</label>
-                <input type="text" class="form-control" v-model="dataShowDetail.title" />
-            </div>
-            <div class="content">
-                <label for="" class="control-label">Price</label>
-                <input type="text" class="form-control" v-model="dataShowDetail.price" />
-            </div>
-            <div class="content">
-                <label for="" class="control-label">Ingredient</label>
-                <input type="text" class="form-control" v-model="dataShowDetail.ingredient" />
-            </div>
-            <div class="content">
-                <label for="" class="control-label">Color</label>
-                <input type="text" class="form-control" v-model="dataShowDetail.color" />
-            </div>
-            <div class="content">
-                <label for="" class="control-label">Decorate</label>
-                <input type="text" class="form-control" v-model="dataShowDetail.decorate" />
-            </div>
-            <div class="content">
-                <label for="" class="control-label">Reason</label>
-                <input type="text" class="form-control" v-model="dataShowDetail.reason" />
-            </div>
-            <div class="content">
-                <label for="" class="control-label">Size</label>
-                <input type="text" class="form-control" v-model="dataShowDetail.size" />
-            </div>
-            <div class="content">
-                <label for="" class="control-label">Category</label>
-                <Multiselect 
-                v-model="dataShowDetail.listCategoryId" 
-                :options="list_categorys"
-                placeholder="Chọn thể loại"
-                label="name"
-                track-by="id"
-                :multiple="true"
-                :close-on-select="false"
-                :clear-on-select="false"
-                :preserve-search="true"
-                :preselect-first="false"
-                >
-                </Multiselect>
-            </div>
-            <div class="content">
-                <label for="" class="control-label">image</label>
-                <input type="file" @change="onFileChange">
-            </div>
-            <div class="content">
-                <p>Ảnh hiện tại</p>
-                <img :src="urlImage + dataShowDetail.current_image" id="preview-image-create">
-            </div>
-            <div class="content" v-if="dataShowDetail.id != 0">
-                <p>Ảnh chỉnh sửa</p>
-                <img src="" alt="" id="preview-image-edit">
-            </div>
-            <div class="content" style="display: inline-block;align-self: flex-end;width: 100%;">
-                <button type="button" class="form-control" style="background: #28a745;color: white;" @click="createdItem()">Save</button>
+            <div class="d-flex">
+                <div class="detail">
+                    <button type="button" class="form-control" style="background: #28a745;"
+                        @click="showModalDataDetail()">Tạo sản phẩm</button>
+                </div>
+                <div class="detail">
+                    <button type="button" class="form-control" @click="getAll()">Lọc dữ liệu</button>
+                </div>
             </div>
         </div>
-    </modal>
+        <div class="row mt-3">
+            <div class="col-12">
+                <table class="table table-striped table-bordered table-hover" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th v-for="(item, index) in tableColumns" :key="index">{{ item }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, index) in list_data" :key="index">
+                            <td>{{ item.id }}</td>
+                            <td>{{ item.name }}</td>
+                            <td style="width: 7%;"><img :src="urlImage + item.image" alt=""></td>
+                            <td>{{ item.title }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.ingredient }}</td>
+                            <td>{{ item.size }}</td>
+                            <td>{{ item.note }}</td>
+                            <td class="operation">
+                                <span @click="showModalDataDetail(index)">
+                                    <i class="tim-icons icon-pencil"></i>
+                                </span>
+                                <span @click="deleteItem(item.id)">
+                                    <i class="tim-icons icon-trash-simple"></i>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr v-if="list_data.length < 1">
+                            <td colspan="8">Không có dữ liệu</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <modal :show.sync="searchModalVisible" class="model-detail" id="editItem" :centered="false" :show-close="true">
+            <div class="show-data-detail">
+                <div class="content">
+                    <label for="" class="control-label">Name</label>
+                    <input type="text" class="form-control" v-model="dataShowDetail.name" />
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">Title</label>
+                    <input type="text" class="form-control" v-model="dataShowDetail.title" />
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">Price</label>
+                    <input type="text" class="form-control" v-model="dataShowDetail.price" />
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">Ingredient</label>
+                    <input type="text" class="form-control" v-model="dataShowDetail.ingredient" />
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">Color</label>
+                    <input type="text" class="form-control" v-model="dataShowDetail.color" />
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">Decorate</label>
+                    <input type="text" class="form-control" v-model="dataShowDetail.decorate" />
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">Reason</label>
+                    <input type="text" class="form-control" v-model="dataShowDetail.reason" />
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">Size</label>
+                    <input type="text" class="form-control" v-model="dataShowDetail.size" />
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">Category</label>
+                    <Multiselect v-model="dataShowDetail.listCategoryId" :options="list_categorys"
+                        placeholder="Chọn thể loại" label="name" track-by="id" :multiple="true" :close-on-select="false"
+                        :clear-on-select="false" :preserve-search="true" :preselect-first="false">
+                    </Multiselect>
+                </div>
+                <div class="content">
+                    <label for="" class="control-label">image</label>
+                    <input type="file" @change="onFileChange" id="uploadFile">
+                </div>
+                <div class="content">
+                    <p>Ảnh hiện tại</p>
+                    <img :src="urlImage + dataShowDetail.current_image" id="preview-image-create">
+                </div>
+                <div class="content" v-if="dataShowDetail.id != 0">
+                    <p>Ảnh chỉnh sửa</p>
+                    <img src="" alt="" id="preview-image-edit">
+                </div>
+                <div class="content" style="display: inline-block;align-self: flex-end;width: 100%;">
+                    <button type="button" class="form-control" style="background: #28a745;color: white;"
+                        @click="createdItem()">Save</button>
+                </div>
+            </div>
+        </modal>
 
-    <Paginate :total-pages="pagination.total_page" :total="pagination.total" :per-page="pagination.per_page" :current-page="pagination.current_page" @pagechanged="onPageChange"></Paginate>
-</div>
+        <Paginate :total-pages="pagination.total_page" :total="pagination.total" :per-page="pagination.per_page"
+            :current-page="pagination.current_page" @pagechanged="onPageChange"></Paginate>
+    </div>
 </template>
 
 <script>
@@ -136,6 +140,9 @@ import BaseTable from "@/components/BaseTable";
 import Modal from "@/components/Modal.vue";
 import Paginate from "./paginate.vue";
 import Multiselect from 'vue-multiselect';
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
+import NotificationTemplate from "../Notifications/NotificationTemplate";
 
 const tableColumns = ["Id", "Name", "Image", "Title", "Price", "Ingredient", "Desription", "operation"];
 
@@ -146,14 +153,16 @@ export default {
         Modal,
         Paginate,
         Multiselect,
+        Loading,
     },
     data() {
         return {
             urlImage: "http://103.187.5.254:8090/api/files/files/",
+            isLoading: false,
             searchData: {
                 name: null,
-                priceTo: 1000000000000000000,
-                priceFrom: 0,
+                priceTo: null,
+                priceFrom: null,
                 size: 8,
                 page: 1,
             },
@@ -198,8 +207,14 @@ export default {
         }
     },
     methods: {
-        getAll() {
-            this.axios.post('/api/cake/getAll', this.searchData)
+        async getAll(page = null) {
+            this.isLoading = true;
+            if (page == null) {
+                this.searchData.page = 1;
+            } else {
+                this.searchData.page = page;
+            }
+            await this.axios.post('/api/cake/getAll', this.searchData)
                 .then(response => {
                     if (response.data.data != null) {
                         this.pagination.total = response.data.data.totalItems;
@@ -216,55 +231,52 @@ export default {
                         this.searchData.size = this.searchData.size;
                         this.list_data = [];
                     }
+                    this.isLoading = false;
                 })
                 .catch(function (error) {
-                    console.log(error);
-                });
-        },
-        getDataDetail(id) {
-            this.axios.get(`/api/cake/findById/${id}`)
-                .then(response => {
-                    this.dataShowDetail = response.data.data;
-                })
-                .catch(function (error) {
+                    this.isLoading = false;
                     console.log(error);
                 });
         },
         showModalDataDetail(index = null) {
+            this.isLoading = true;
             this.searchModalVisible = true;
+            var uploadFile = document.getElementById("uploadFile");
+            uploadFile.value = "";
 
             this.axios.post('/api/category/getAll', this.searchData)
                 .then(response => {
                     this.list_categorys = response.data.data.result;
-                    console.log(this.list_categorys);
                 })
                 .catch(function (error) {
                     console.log(error);
                 });
-            
+
             if (index != null) {
                 this.axios.get(`/api/cake/findById/${this.list_data[index].id}`)
                     .then(response => {
                         console.log(response.data);
-                    this.dataShowDetail = {
-                        id: response.data.data.id,
-                        name: response.data.data.name,
-                        price: response.data.data.price,
-                        ingredient: response.data.data.ingredient,
-                        listCategoryId: response.data.data.listCategoryId,
-                        current_image: response.data.data.image,
-                        image: response.data.data.image,
-                        title: response.data.data.title,
-                        decorate: response.data.data.decorate,
-                        note: response.data.data.note,
-                        size: response.data.data.size,
-                        color: response.data.data.color,
-                        reason: response.data.data.reason,
-                    }
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
+                        this.dataShowDetail = {
+                            id: response.data.data.id,
+                            name: response.data.data.name,
+                            price: response.data.data.price,
+                            ingredient: response.data.data.ingredient,
+                            listCategoryId: response.data.data.categoryList,
+                            current_image: response.data.data.image,
+                            image: response.data.data.image,
+                            title: response.data.data.title,
+                            decorate: response.data.data.decorate,
+                            note: response.data.data.note,
+                            size: response.data.data.size,
+                            color: response.data.data.color,
+                            reason: response.data.data.reason,
+                        }
+                        const image = document.getElementById("preview-image-edit");
+                        image.src = '';
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    });
             } else {
                 this.dataShowDetail = {
                     id: 0,
@@ -282,14 +294,16 @@ export default {
                     reason: null,
                 }
             }
+            this.isLoading = false;
         },
-        createdItem() {
-            if (this.dataShowDetail.image == "" || this.dataShowDetail.image == null) {
+        async createdItem() {
+            if (this.dataShowDetail.image == "" || this.dataShowDetail.image == null || this.dataShowDetail.listCategoryId == undefined) {
+                this.notifyVue('danger', 'Không thể thực hiện vui lòng kiểm tra lại!');
                 return;
             }
+            this.isLoading = true;
             const formData = new FormData();
             formData.append("file", this.dataShowDetail.image);
-
 
             var list_categoryId = "";
             this.dataShowDetail.listCategoryId.map((item) => {
@@ -297,57 +311,104 @@ export default {
             });
             this.dataShowDetail.listCategoryId = list_categoryId;
 
-            const configUpload = {
-                headers: {
-                    Authorization: 'Bearer ' + JSON.parse(localStorage.getItem('user')).accessToken,
-                    'Content-Type': 'multipart/form-data'
-                },
-            };
-
             if (this.dataShowDetail.id == 0) {
-                this.axios.post('/api/files/upload', formData, configUpload)
-                    .then(response => {
-                        this.dataShowDetail.image = response.data;
-
-                        this.axios.post('/api/cake/create', this.dataShowDetail, this.config)
-                            .then(res => {
-                                alert('Thêm thành công');
-                            })
-                            .catch(function (error) {
-                                console.log(error);
-                            });
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                if (this.updateImage(formData) == 1) {
+                    this.axios.post('/api/cake/create', this.dataShowDetail, this.config)
+                        .then(res => {
+                            this.searchModalVisible = false;
+                            this.getAll();
+                            this.notifyVue('success', 'Thêm sản phầm thành công');
+                        })
+                        .catch(function (error) {
+                            this.isLoading = false;
+                            console.log(error);
+                        });
+                }
             } else {
-                this.axios.post('/api/files/upload', formData, configUpload)
-                    .then(response => {
-                        this.dataShowDetail.image = response.data;
-
+                var checkImageExist = await this.checkImageExist();
+                if (checkImageExist == 1) {
+                    this.axios.post(`/api/cake/update/${this.dataShowDetail.id}`, this.dataShowDetail, this.config)
+                        .then(res => {
+                            this.searchModalVisible = false;
+                            this.getAll();
+                            this.notifyVue('success', 'Chỉnh sửa thành công');
+                        })
+                        .catch(function (error) {
+                            // this.isLoading = false;
+                            console.log(error);
+                        });
+                } else {
+                    var updateImage = await this.updateImage(formData);
+                    if (updateImage == 1) {
                         this.axios.post(`/api/cake/update/${this.dataShowDetail.id}`, this.dataShowDetail, this.config)
                             .then(res => {
-                                alert('Chỉnh sửa thành công');
+                                this.searchModalVisible = false;
+                                this.getAll();
+                                this.notifyVue('success', 'Chỉnh sửa thành công');
                             })
                             .catch(function (error) {
+                                // this.isLoading = false;
                                 console.log(error);
                             });
+                    }
+                }
+            }
+            this.getAll();
+        },
+        async updateImage(formData) {
+            try {
+                const configUpload = {
+                    headers: {
+                        Authorization: 'Bearer ' + JSON.parse(localStorage.getItem('user')).accessToken,
+                        'Content-Type': 'multipart/form-data'
+                    },
+                };
+
+                var data = await this.axios.post('/api/files/upload', formData, configUpload);
+                this.dataShowDetail.image = data.data;
+
+                if (data) {
+                    return 1;
+                }
+                return 2;
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        async deleteItem(id) {
+            this.isLoading = true;
+            if (confirm("Bạn có chắn chắn muốn xóa bản ghi này không?")) {
+                await this.axios.get(`/api/cake/delete/${id}`, this.config)
+                    .then(res => {
+                        this.getAll();
+                        this.notifyVue('success', 'Xóa thành công');
                     })
                     .catch(function (error) {
                         console.log(error);
+                        this.isLoading = false;
                     });
             }
-            this.getAll();
-            this.searchModalVisible = false;
         },
-        deleteItem(id) {
-            this.axios.get(`/api/cake/delete/${id}`, this.config)
-                .then(res => {
-                    alert('Xóa thành công');
-                })
-                .catch(function (error) {
-                    console.log(error);
-                });
+        async checkImageExist() {
+            try {
+                if (this.dataShowDetail.current_image == this.dataShowDetail.image) {
+                    return 1;
+                }
+                return 2;
+            } catch (e) {
+                console.log(e);
+            }
+        },
+        notifyVue(color, message) {
+            this.$notify({
+                component: NotificationTemplate,
+                icon: "tim-icons icon-bell-55",
+                horizontalAlign: 'top',
+                verticalAlign: 'right',
+                type: color,
+                timeout: 3000,
+                message: message,
+            });
         },
         onFileChange(e) {
             var files = e.target.files || e.dataTransfer.files;
@@ -366,7 +427,7 @@ export default {
         },
         onPageChange(page) {
             this.searchData.page = page;
-            this.getAll();
+            this.getAll(page);
             this.pagination.current_page = page;
         }
     },

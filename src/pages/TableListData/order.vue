@@ -1,5 +1,6 @@
 <template>
     <div class="content">
+        <Loading :active.sync="isLoading" :can-cancel="true" :is-full-page="true"></Loading>
         <div class="filter">
             <div class="detail">
                 <input type="text" class="form-control" placeholder="Search email..." />
@@ -9,6 +10,15 @@
             </div>
             <div class="detail">
                 <input type="datetime-local" class="form-control" v-model="searchData.toDate" />
+            </div>
+            <div class="detail">
+                <select name="" class="form-control" id="" v-model="searchData.size">
+                    <option value="" disabled selected>Select paginate</option>
+                    <option value="8">8</option>
+                    <option value="25">25</option>
+                    <option value="50">8</option>
+                    <option value="75">75</option>
+                </select>
             </div>
             <div class="detail">
                 <select name="" id="" class="form-control" v-model="searchData.status">
@@ -84,10 +94,10 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in dataShowDetail" :key="index">
+                            <td style="width: 10%;"><img :src="urlImage + item.image" alt=""></td>
                             <td>{{ item.nameCake }}</td>
                             <td>{{ item.quantity }}</td>
                             <td>{{ item.price }}</td>
-                            <td>{{ item.image }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -105,9 +115,12 @@ import BaseTable from "@/components/BaseTable";
 import Modal from "@/components/Modal.vue";
 import Paginate from "./paginate.vue";
 import moment from 'moment';
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
+import NotificationTemplate from "../Notifications/NotificationTemplate";
 
 const tableColumns = ["Id", "User Name", "Email", "Order Code", "Delivery Address", "phone", "deliveryDate", "Detail", "status", "Hành động"];
-const tableColumns_dataDetail = ["Product Name", "Quantity", "Price", "Image"];
+const tableColumns_dataDetail = ["Image","Product Name", "Quantity", "Price"];
 
 export default {
     components: {
@@ -115,9 +128,12 @@ export default {
         BaseTable,
         Modal,
         Paginate,
+        Loading,
     },
     data() {
         return {
+            isLoading: false,
+            urlImage: "http://103.187.5.254:8090/api/files/files/",
             searchModalVisible: false,
             tableColumns: tableColumns,
             tableColumns_dataDetail: tableColumns_dataDetail,
@@ -151,7 +167,14 @@ export default {
         }
     },
     methods: {
-        getAll() {
+        getAll(page = null) {
+            this.isLoading = true;
+            if (page == null) {
+                this.searchData.page = 1;
+            } else {
+                this.searchData.page = page;
+            }
+            
             if (this.searchData.fromDate != null) {
                 this.searchData.fromDate = moment(this.searchData.fromDate).format('YYYY-DD-MM hh:mm');
             }
@@ -176,8 +199,10 @@ export default {
                     this.searchData.size = this.searchData.size;
                     this.list_data = [];
                 }
+                this.isLoading = false;
             })
             .catch(function (error) {
+                this.isLoading = false;
                 console.log(error);
             });
         },
@@ -190,12 +215,15 @@ export default {
                 console.log(error);
             });
         },
-        updateStatusOrder(id ,status) {
+        updateStatusOrder(id, status) {
+            this.isLoading = true;
             this.axios.post(`/api/order/procedure/${id}`, {procedure: `${status}`}, this.config)
                 .then(response => {
-                    alert("chuyển trạng thái thành công");
+                    this.notifyVue('success', 'Chuyển trạng thái thành công');
+                    this.getAll();
                 })
                 .catch(function (error) {
+                    this.isLoading = false;
                     console.log(error);
                 });
             this.getAll();
@@ -226,12 +254,27 @@ export default {
                     return `<span class='badge badge-secondary' style="cursor: pointer;" disabled>Đã hủy</span>`;
             }
         },
+        notifyVue(color, message) {
+            this.$notify({
+                component: NotificationTemplate,
+                icon: "tim-icons icon-bell-55",
+                horizontalAlign: 'top',
+                verticalAlign: 'right',
+                type: color,
+                timeout: 3000,
+                message: message,
+            });
+        },
         showModalDataDetail(id) {
+            this.isLoading = true;
             this.searchModalVisible = true;
             this.getDataDetail(id);
+            this.isLoading = false;
         },
         onPageChange(page) {
-            alert(page);
+            this.searchData.page = page;
+            this.getAll(page);
+            this.pagination.current_page = page;
         }
     },
     created() {

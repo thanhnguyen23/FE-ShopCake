@@ -1,9 +1,19 @@
 <template>
     <div class="content">
+        <Loading :active.sync="isLoading" :can-cancel="true" :is-full-page="true"></Loading>
         <div class="filter d-flex justify-content-between">
             <div class="d-flex">
                 <div class="detail">
                     <input type="text" class="form-control" placeholder="Search name promotions..." v-model="searchData.name" />
+                </div>
+                <div class="detail">
+                    <select name="" class="form-control" id="" v-model="searchData.size">
+                        <option value="" disabled selected>Select paginate</option>
+                        <option value="8">8</option>
+                        <option value="25">25</option>
+                        <option value="50">8</option>
+                        <option value="75">75</option>
+                    </select>
                 </div>
             </div>
             <div class="d-flex">
@@ -86,6 +96,9 @@ import BaseTable from "@/components/BaseTable";
 import Modal from "@/components/Modal.vue";
 import Paginate from "./paginate.vue";
 import moment from 'moment';
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
+import NotificationTemplate from "../Notifications/NotificationTemplate";
 
 const tableColumns = ["Id", "Name", "Discount", "Start Date", "End Date"];
 
@@ -95,9 +108,11 @@ export default {
         BaseTable,
         Modal,
         Paginate,
+        Loading,
     },
     data() {
         return {
+            isLoading: false,
             searchData: {
                 name: null,
                 size: 8,
@@ -137,6 +152,7 @@ export default {
     },
     methods: {
         getAll() {
+            this.isLoading = true;
             this.axios.post('/api/promotions/getAll', this.searchData)
                 .then(response => {
                     if (response.data.data != null) {
@@ -154,21 +170,27 @@ export default {
                         this.searchData.size = this.searchData.size;
                         this.list_data = [];
                     }
+                    this.isLoading = false;
                 })
                 .catch(function (error) {
+                    this.isLoading = false;
                     console.log(error);
                 });
         },
         getDataDetail(id) {
+            this.isLoading = true;
             this.axios.get(`/api/cake/findById/${id}`)
                 .then(response => {
                     this.dataShowDetail = response.data.data;
+                    this.isLoading = false;
                 })
                 .catch(function (error) {
+                    this.isLoading = false;
                     console.log(error);
                 });
         },
         showModalDataDetail(index = null) {
+            this.isLoading = true;
             this.searchModalVisible = true;
 
             if (index != null) {
@@ -188,37 +210,60 @@ export default {
                     endDate: null,
                 }
             }
+            this.isLoading = false;
         },
         createdItem() {
+            this.isLoading = true;
             this.dataShowDetail.startDate = moment(this.dataShowDetail.startDate).format('YYYY-DD-MM hh:mm');
             this.dataShowDetail.endDate = moment(this.dataShowDetail.endDate).format('YYYY-DD-MM hh:mm');
 
             if (this.dataShowDetail.id == 0) {
                 this.axios.post('/api/promotions/create', this.dataShowDetail, this.config)
                     .then(res => {
-                        alert('Thêm thành công');
+                        this.notifyVue('success', 'Thêm thành công');
+                        this.getAll();
+                        this.isLoading = false;
                     })
                     .catch(function (error) {
+                        this.isLoading = false;
                         console.log(error);
                     });
             } else {
                 this.axios.post(`/api/promotions/update/${this.dataShowDetail.id}`, this.dataShowDetail, this.config)
                     .then(res => {
-                        alert('Chỉnh sửa thành công');
+                        this.notifyVue('success', 'Chỉnh sửa thành công');
+                        this.getAll();
+                        this.isLoading = false;
                     })
                     .catch(function (error) {
+                        this.isLoading = false;
                         console.log(error);
                     });
             }
         },
         deleteItem(id) {
+            this.isLoading = true;
             this.axios.get(`/api/promotions/delete/${id}`, this.config)
                 .then(res => {
-                    alert('Xóa thành công');
+                    this.notifyVue('success', 'Xóa thành công');
+                    this.getAll();
+                    this.isLoading = false;
                 })
                 .catch(function (error) {
+                    this.isLoading = false;
                     console.log(error);
                 });
+        },
+        notifyVue(color, message) {
+            this.$notify({
+                component: NotificationTemplate,
+                icon: "tim-icons icon-bell-55",
+                horizontalAlign: 'top',
+                verticalAlign: 'right',
+                type: color,
+                timeout: 3000,
+                message: message,
+            });
         },
         onPageChange(page) {
             this.searchData.page = page;
