@@ -142,7 +142,7 @@
               <li class="dropdown-divider"></li>
 
               <li class="nav-link">
-                <a href="javascript:void(0)" class="nav-item dropdown-item">
+                <a href="javascript:void(0)" @click="logOut()" class="nav-item dropdown-item">
                   Log out
                 </a>
               </li>
@@ -177,6 +177,10 @@ export default {
     toggleMenu() {
       this.showMenu = !this.showMenu;
     },
+    logOut() {
+      this.$store.dispatch('auth/logout');
+      location.reload();
+    },  
   },
   computed: {
     isRTL() {

@@ -17,7 +17,7 @@
                         <option value="" disabled selected>Select paginate</option>
                         <option value="8">8</option>
                         <option value="25">25</option>
-                        <option value="50">8</option>
+                        <option value="50">50</option>
                         <option value="75">75</option>
                     </select>
                 </div>
@@ -42,7 +42,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in list_data" :key="index">
-                            <td>{{ item.id }}</td>
+                            <td>{{ index }}</td>
                             <td>{{ item.name }}</td>
                             <td style="width: 7%;"><img :src="urlImage + item.image" alt=""></td>
                             <td>{{ item.title }}</td>
@@ -50,6 +50,9 @@
                             <td>{{ item.ingredient }}</td>
                             <td>{{ item.size }}</td>
                             <td>{{ item.note }}</td>
+                            <td>
+                                <span v-for="(cate, index) in item.categoryList" :key="index">{{ cate.name }}, </span>
+                            </td>
                             <td class="operation">
                                 <span @click="showModalDataDetail(index)">
                                     <i class="tim-icons icon-pencil"></i>
@@ -78,7 +81,7 @@
                 </div>
                 <div class="content">
                     <label for="" class="control-label">Price</label>
-                    <input type="text" class="form-control" v-model="dataShowDetail.price" />
+                    <input type="number" class="form-control" v-model="dataShowDetail.price" />
                 </div>
                 <div class="content">
                     <label for="" class="control-label">Ingredient</label>
@@ -144,7 +147,7 @@ import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
 
-const tableColumns = ["Id", "Name", "Image", "Title", "Price", "Ingredient", "Size", "Desription", "operation"];
+const tableColumns = ["Id", "Name", "Image", "Title", "Price", "Ingredient", "Size", "Desription", "Category", "operation"];
 
 export default {
     components: {
@@ -235,7 +238,8 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    console.log(error);
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
                 });
         },
         showModalDataDetail(index = null) {
@@ -249,19 +253,20 @@ export default {
                     this.list_categorys = response.data.data.result;
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
                 });
 
             if (index != null) {
                 this.axios.get(`/api/cake/findById/${this.list_data[index].id}`)
                     .then(response => {
-                        console.log(response.data);
+                        var categoryList = this.list_data[index].categoryList;
                         this.dataShowDetail = {
                             id: response.data.data.id,
                             name: response.data.data.name,
                             price: response.data.data.price,
                             ingredient: response.data.data.ingredient,
-                            listCategoryId: response.data.data.categoryList,
+                            listCategoryId: categoryList,
                             current_image: response.data.data.image,
                             image: response.data.data.image,
                             title: response.data.data.title,
@@ -275,7 +280,8 @@ export default {
                         image.src = '';
                     })
                     .catch(function (error) {
-                        console.log(error);
+                        this.$store.dispatch('auth/logout');
+                        location.reload();
                     });
             } else {
                 this.dataShowDetail = {
@@ -312,7 +318,8 @@ export default {
             this.dataShowDetail.listCategoryId = list_categoryId;
 
             if (this.dataShowDetail.id == 0) {
-                if (this.updateImage(formData) == 1) {
+                var updateImage = await this.updateImage(formData);
+                if (updateImage == 1) {
                     this.axios.post('/api/cake/create', this.dataShowDetail, this.config)
                         .then(res => {
                             this.searchModalVisible = false;
@@ -321,7 +328,8 @@ export default {
                         })
                         .catch(function (error) {
                             this.isLoading = false;
-                            console.log(error);
+                            this.$store.dispatch('auth/logout');
+                            location.reload();
                         });
                 }
             } else {
@@ -334,8 +342,9 @@ export default {
                             this.notifyVue('success', 'Chỉnh sửa thành công');
                         })
                         .catch(function (error) {
-                            // this.isLoading = false;
-                            console.log(error);
+                            this.isLoading = false;
+                            this.$store.dispatch('auth/logout');
+                            location.reload();
                         });
                 } else {
                     var updateImage = await this.updateImage(formData);
@@ -347,8 +356,9 @@ export default {
                                 this.notifyVue('success', 'Chỉnh sửa thành công');
                             })
                             .catch(function (error) {
-                                // this.isLoading = false;
-                                console.log(error);
+                                this.isLoading = false;
+                                this.$store.dispatch('auth/logout');
+                                location.reload();
                             });
                     }
                 }
@@ -366,6 +376,7 @@ export default {
 
                 var data = await this.axios.post('/api/files/upload', formData, configUpload);
                 this.dataShowDetail.image = data.data;
+
 
                 if (data) {
                     return 1;
@@ -385,8 +396,9 @@ export default {
                         this.isLoading = false;
                     })
                     .catch(function (error) {
-                        console.log(error);
                         this.isLoading = false;
+                        this.$store.dispatch('auth/logout');
+                        location.reload();
                     });
             }
         },

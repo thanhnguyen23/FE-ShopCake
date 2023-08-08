@@ -16,7 +16,7 @@
                     <option value="" disabled selected>Select paginate</option>
                     <option value="8">8</option>
                     <option value="25">25</option>
-                    <option value="50">8</option>
+                    <option value="50">50</option>
                     <option value="75">75</option>
                 </select>
             </div>
@@ -44,10 +44,9 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in list_data" :key="index">
-                            <td>{{ item.id }}</td>
+                            <td>{{ index }}</td>
                             <td>{{ item.name }}</td>
                             <td>{{ item.email }}</td>
-                            <td>{{ item.orderCode }}</td>
                             <td>{{ item.deliveryAddress }}</td>
                             <td>{{ item.phone }}</td>
                             <td>{{ momentFormatDate(item.deliveryDate) }}</td>
@@ -58,19 +57,19 @@
                             </td>
                             <td v-html="checkStatusItem(item.status)"></td>
                             <td v-if="item.status == 1">
-                                <span class="badge badge-primary" style="cursor: pointer;" @click="updateStatusOrder(item.id, 'xác nhận')">Nhận đơn</span> <span class="badge badge-danger" style="cursor: pointer;" @click="updateStatusOrder(item.id, 'từ chối')">Hủy đơn</span>
+                                <span class="badge badge-primary" style="cursor: pointer; white-space: unset;" @click="updateStatusOrder(item.id, 'xác nhận')">Nhận đơn</span> <span class="badge badge-danger" style="cursor: pointer; white-space: unset;" @click="updateStatusOrder(item.id, 'từ chối')">Hủy đơn</span>
                             </td>
                             <td v-if="item.status == 2">
-                                <span class='badge badge-info' style="cursor: pointer;" @click="updateStatusOrder(item.id, 'vận chuyển')">Xác nhận giao hàng</span>
+                                <span class='badge badge-info' style="cursor: pointer; white-space: unset;" @click="updateStatusOrder(item.id, 'vận chuyển')">Xác nhận giao hàng</span>
                             </td>
                             <td v-if="item.status == 3">
-                                <span class='badge badge-success' style="cursor: pointer;" @click="updateStatusOrder(item.id, 'hoàn thành')">Xác nhận Hoàn thành</span>
+                                <span class='badge badge-success' style="cursor: pointer; white-space: unset;">Chờ xác nhận Hoàn thành</span>
                             </td>
                             <td v-if="item.status == 4">
-                                <span class='badge badge-success' style="cursor: pointer;">Đơn đã hoàn thành</span>
+                                <span class='badge badge-success' style="cursor: pointer; white-space: unset;">Đơn đã hoàn thành</span>
                             </td>
                             <td v-if="item.status == 5">
-                                <span class='badge badge-secondary' style="cursor: pointer;" disabled>Đã hủy</span>
+                                <span class='badge badge-secondary' style="cursor: pointer; white-space: unset;" disabled>Đã hủy</span>
                             </td>
                         </tr>
                         <tr v-if="list_data.length < 1">
@@ -119,7 +118,7 @@ import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
 
-const tableColumns = ["Id", "User Name", "Email", "Order Code", "Delivery Address", "phone", "deliveryDate", "Detail", "status", "Hành động"];
+const tableColumns = ["Id", "User Name", "Email", "Delivery Address", "phone", "deliveryDate", "Detail", "status", "operation"];
 const tableColumns_dataDetail = ["Image","Product Name", "Quantity", "Price"];
 
 export default {
@@ -140,10 +139,9 @@ export default {
             list_data: [],
             dataShowDetail: [],
             searchData: {
-                search_name: null,
                 size: 8,
                 page: 1,
-                userId: 1,
+                userId: 0,
                 status: null,
                 fromDate: null,
                 toDate: null
@@ -202,55 +200,54 @@ export default {
                 this.isLoading = false;
             })
             .catch(function (error) {
-                console.log(error);
+                this.$store.dispatch('auth/logout');
+      location.reload();
             });
         },
         getDataDetail(id) {
             this.axios.get(`/api/order/findById/${id}`)
-            .then(response => {
-                this.dataShowDetail = response.data.data;
+                .then(response => {
+                this.dataShowDetail = response.data.data.detailDtoList;
             })
             .catch(function (error) {
-                console.log(error);
+                this.$store.dispatch('auth/logout');
+                    location.reload();
             });
         },
         updateStatusOrder(id, status) {
+            if (status == "từ chối") {
+                if (confirm("Bạn có chắn chắn muốn hủy đơn hàng này không")) {
+                    this.changeStatusOrder(id,status);
+                }
+            }
+            
+        },
+        changeStatusOrder(id, status) {
             this.isLoading = true;
-            this.axios.post(`/api/order/procedure/${id}`, {procedure: `${status}`}, this.config)
+            this.axios.post(`/api/order/procedure/${id}`, { procedure: `${status}` }, this.config)
                 .then(response => {
                     this.notifyVue('success', 'Chuyển trạng thái thành công');
                     this.getAll();
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    console.log(error);
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
                 });
             this.getAll();
         },
         checkStatusItem(status) {
             switch (status) {
                 case 1:
-                    return `<span class='badge badge-light'>Đơn mới</span>`;
+                    return `<span>Đơn mới</span>`;
                 case 2:
-                    return `<span class='badge badge-primary'>Đã xác nhận</span>`;
+                    return `<span>Đã xác nhận</span>`;
                 case 3:
-                    return `<span class='badge badge-info'>Đang giao hàng</span>`;
+                    return `<span>Đang giao hàng</span>`;
                 case 4:
-                    return `<span class='badge badge-success'>Hoàn thành</span>`;
-                case 4:
-                    return `<span class='badge badge-secondary'>Đã hủy</span>`;
-            }
-        },
-        checkStatusHandleOrder(status) {
-            switch (status) {
-                case 1:
-                    return `<span class="badge badge-primary" style="cursor: pointer;" @click="updateStatusOrder('xác nhận')">Nhận đơn</span> <span class="badge badge-danger" style="cursor: pointer;" @click="updateStatusOrder('từ chối')">Hủy đơn</span>`;
-                case 3:
-                    return `<span class='badge badge-info' style="cursor: pointer;" @click="updateStatusOrder('vận chuyển')">Xác nhận giao hàng</span>`;
-                case 4:
-                    return `<span class='badge badge-success' style="cursor: pointer;" @click="updateStatusOrder('hoàn thành')">Xác nhận Hoàn thành</span>`;
-                case 4:
-                    return `<span class='badge badge-secondary' style="cursor: pointer;" disabled>Đã hủy</span>`;
+                    return `<span>Hoàn thành</span>`;
+                case 5:
+                    return `<span>Đã hủy</span>`;
             }
         },
         notifyVue(color, message) {
@@ -265,7 +262,7 @@ export default {
             });
         },
         momentFormatDate(date) {
-            return moment(date).format('YYYY-DD-MM hh:mm');
+            return moment(date).format('YYYY-MM-DD hh:mm');
         },
         showModalDataDetail(id) {
             this.isLoading = true;
@@ -315,7 +312,7 @@ button:focus {
 }
 
 .detail button {
-    white-space: nowrap;
+    white-space: pre-wrap;
     background: linear-gradient(0deg, #3358f4 0%, #1d8cf8 100%);
     color: white;
     border: none;

@@ -11,7 +11,7 @@
                         <option value="" disabled selected>Select paginate</option>
                         <option value="8">8</option>
                         <option value="25">25</option>
-                        <option value="50">8</option>
+                        <option value="50">50</option>
                         <option value="75">75</option>
                     </select>
                 </div>
@@ -19,10 +19,10 @@
             <div class="d-flex">
                 <div class="detail">
                     <button type="button" class="form-control" style="background: #28a745;"
-                        @click="showModalDataDetail()">Tạo mã giảm giá</button>
+                        @click="showModalDataDetail()">Add promotions</button>
                 </div>
                 <div class="detail">
-                    <button type="button" class="form-control" @click="getAll()">Lọc dữ liệu</button>
+                    <button type="button" class="form-control" @click="getAll()">Filter data</button>
                 </div>
             </div>
         </div>
@@ -36,11 +36,12 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in list_data" :key="index">
-                            <td>{{ item.id }}</td>
+                            <td>{{ index }}</td>
                             <td>{{ item.name }}</td>
                             <td>{{ item.discount }}</td>
                             <td>{{ momentFormatDate(item.startDate) }}</td>
                             <td>{{ momentFormatDate(item.endDate) }}</td>
+                            <td><button type="button" class="form-control" @click="addProductToPromotions(item.id, 1)">Add product</button></td>
                             <td class="operation">
                                 <span @click="showModalDataDetail(index)">
                                     <i class="tim-icons icon-pencil"></i>
@@ -51,7 +52,7 @@
                             </td>
                         </tr>
                         <tr v-if="list_data.length < 1">
-                            <td colspan="6">Không có dữ liệu</td>
+                            <td colspan="6">No data</td>
                         </tr>
                     </tbody>
                 </table>
@@ -82,6 +83,28 @@
             </div>
         </modal>
 
+        <modal :show.sync="addProduct" class="model-detail" id="addProduct" :centered="false" :show-close="true">
+                <div class="show-data-detail">
+                    <div class="content">
+                        <label for="" class="control-label">product</label>
+                        <Multiselect v-model="list_product_add" :options="list_product"
+                            placeholder="Chọn thể loại" 
+                            :multiple="true"
+                            :close-on-select="false"
+                            :clear-on-select="false"
+                            :preserve-search="true"
+                            label="name"
+                            track-by="id"
+                            :preselect-first="false">
+                        </Multiselect>
+                    </div>
+                    <div class="content" style="display: inline-block;align-self: flex-end;">
+                        <button type="button" class="form-control" style="background: #28a745;color: white;"
+                            @click="submitAddProductToPromotions()">add</button>
+                    </div>
+                </div>
+            </modal>
+
         <Paginate :total-pages="pagination.total_page" :total="pagination.total" :per-page="pagination.per_page"
             :current-page="pagination.current_page" @pagechanged="onPageChange"></Paginate>
     </div>
@@ -96,11 +119,12 @@ import BaseTable from "@/components/BaseTable";
 import Modal from "@/components/Modal.vue";
 import Paginate from "./paginate.vue";
 import moment from 'moment';
+import Multiselect from 'vue-multiselect';
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
 
-const tableColumns = ["Id", "Name", "Discount", "Start Date", "End Date"];
+const tableColumns = ["Id", "Name", "Discount", "Start Date", "End Date", "Add product", "operation"];
 
 export default {
     components: {
@@ -109,6 +133,7 @@ export default {
         Modal,
         Paginate,
         Loading,
+        Multiselect,
     },
     data() {
         return {
@@ -119,8 +144,16 @@ export default {
                 page: 1,
             },
             searchModalVisible: false,
+            addProduct: false,
             tableColumns: tableColumns,
             list_data: [],
+            list_product: [],
+            list_data_add_product: {
+                promotionId: 1,
+                type: 1,
+                listCakeId: []
+            },
+            list_product_add: [],
             dataShowDetail: {
                 id: 0,
                 name: null,
@@ -174,7 +207,8 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    console.log(error);
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
                 });
         },
         getDataDetail(id) {
@@ -186,7 +220,8 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    console.log(error);
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
                 });
         },
         showModalDataDetail(index = null) {
@@ -214,47 +249,87 @@ export default {
         },
         createdItem() {
             this.isLoading = true;
-            this.dataShowDetail.startDate = moment(this.dataShowDetail.startDate).format('YYYY-DD-MM hh:mm');
-            this.dataShowDetail.endDate = moment(this.dataShowDetail.endDate).format('YYYY-DD-MM hh:mm');
+            this.dataShowDetail.startDate = moment(this.dataShowDetail.startDate).format('YYYY-MM-DD hh:mm');
+            this.dataShowDetail.endDate = moment(this.dataShowDetail.endDate).format('YYYY-MM-DD hh:mm');
 
             if (this.dataShowDetail.id == 0) {
                 this.axios.post('/api/promotions/create', this.dataShowDetail, this.config)
                     .then(res => {
-                        this.notifyVue('success', 'Thêm thành công');
+                        this.notifyVue('success', 'add success');
                         this.getAll();
                         this.isLoading = false;
+                        this.searchModalVisible = false;
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        console.log(error);
+                        this.$store.dispatch('auth/logout');
+                        location.reload();
                     });
             } else {
                 this.axios.post(`/api/promotions/update/${this.dataShowDetail.id}`, this.dataShowDetail, this.config)
                     .then(res => {
-                        this.notifyVue('success', 'Chỉnh sửa thành công');
+                        this.notifyVue('success', 'update success');
                         this.getAll();
                         this.isLoading = false;
+                        this.searchModalVisible = false;
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        console.log(error);
+                        this.$store.dispatch('auth/logout');
+                        location.reload();
                     });
             }
         },
         deleteItem(id) {
-            if (confirm("Bạn có chắn chắn muốn xóa bản ghi này không?")) {
+            if (confirm("You are sure that you want to delete this writing not?")) {
                 this.isLoading = true;
                 this.axios.get(`/api/promotions/delete/${id}`, this.config)
                     .then(res => {
-                        this.notifyVue('success', 'Xóa thành công');
+                        this.notifyVue('success', 'delete success');
                         this.getAll();
                         this.isLoading = false;
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        console.log(error);
+                        this.$store.dispatch('auth/logout');
+                        location.reload();
                     });
             }
+        },
+        submitAddProductToPromotions() {
+            this.isLoading = true;
+            this.list_product_add.map((item) => {
+                this.list_data_add_product.listCakeId.push(item.id);
+            });
+            this.axios.post(`/api/promotions/addOrDeleteCake`, this.list_data_add_product, this.config)
+                .then(res => {
+                    this.notifyVue('success', 'Add product to promotions success');
+                    this.getAll();
+                    this.isLoading = false;
+                    this.addProduct = false;
+                })
+                .catch(function (error) {
+                    this.isLoading = false;
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
+                });
+        },  
+        addProductToPromotions(id, type) {
+            this.isLoading = true;
+            this.list_data_add_product.promotionId = id;
+            this.list_data_add_product.type = type;
+
+            this.axios.get(`/api/cake/getCakeByPromotion?promotionId=0`, this.config)
+                .then(res => {
+                    this.list_product = res.data.data;
+                    this.addProduct = true;
+                    this.isLoading = false;
+                })
+                .catch(function (error) {
+                    this.isLoading = false;
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
+                });
         },
         notifyVue(color, message) {
             this.$notify({
@@ -268,7 +343,7 @@ export default {
             });
         },
         momentFormatDate(date) {
-            return moment(date).format('YYYY-DD-MM hh:mm');
+            return moment(date).format('YYYY-MM-DD hh:mm');
         },
         onPageChange(page) {
             this.searchData.page = page;
@@ -279,6 +354,7 @@ export default {
 };
 </script>
 
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style scoped>
 button:focus {
     outline: none;

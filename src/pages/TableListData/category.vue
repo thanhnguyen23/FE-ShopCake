@@ -11,7 +11,7 @@
                         <option value="" disabled selected>Select paginate</option>
                         <option value="8">8</option>
                         <option value="25">25</option>
-                        <option value="50">8</option>
+                        <option value="50">50</option>
                         <option value="75">75</option>
                     </select>
                 </div>
@@ -36,7 +36,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in list_data" :key="index">
-                            <td>{{ item.id }}</td>
+                            <td>{{ index+1 }}</td>
                             <td>{{ item.name }}</td>
                             <td>{{ item.description }}</td>
                             <td class="operation">
@@ -89,7 +89,7 @@ import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
 
-const tableColumns = ["Id", "Name", "Desription"];
+const tableColumns = ["Id", "Name", "Desription", "operation"];
 
 export default {
     components: {
@@ -159,7 +159,8 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    console.log(error);
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
                 });
         },
         getDataDetail(id) {
@@ -168,7 +169,8 @@ export default {
                     this.dataShowDetail = response.data.data;
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
                 });
         },
         showModalDataDetail(index = null) {
@@ -202,7 +204,8 @@ export default {
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        console.log(error);
+                        this.$store.dispatch('auth/logout');
+                        location.reload();
                     });
             } else {
                 this.axios.post(`/api/category/update/${this.dataShowDetail.id}`, this.dataShowDetail, this.config)
@@ -214,7 +217,8 @@ export default {
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        console.log(error);
+                        this.$store.dispatch('auth/logout');
+                        location.reload();
                     });
             }
         },
@@ -237,7 +241,8 @@ export default {
                     this.getAll();
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    this.$store.dispatch('auth/logout');
+                    location.reload();
                 });
             }
         },
