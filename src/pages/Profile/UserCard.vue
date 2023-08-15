@@ -10,7 +10,7 @@
         <h5 class="title">{{ user.fullName }}</h5>
       </a>
       <p class="description">
-        {{ user.title }}
+        {{ user.email }}
       </p>
     </div>
     <p class="card-description">

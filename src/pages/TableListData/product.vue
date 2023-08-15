@@ -42,14 +42,13 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in list_data" :key="index">
-                            <td>{{ index }}</td>
+                            <td>{{ index + 1 }}</td>
                             <td>{{ item.name }}</td>
                             <td style="width: 7%;"><img :src="urlImage + item.image" alt=""></td>
                             <td>{{ item.title }}</td>
-                            <td>{{ item.price }}</td>
+                            <td>{{ formatMoney(item.price) }}</td>
                             <td>{{ item.ingredient }}</td>
                             <td>{{ item.size }}</td>
-                            <td>{{ item.note }}</td>
                             <td>
                                 <span v-for="(cate, index) in item.categoryList" :key="index">{{ cate.name }}, </span>
                             </td>
@@ -96,10 +95,6 @@
                     <input type="text" class="form-control" v-model="dataShowDetail.decorate" />
                 </div>
                 <div class="content">
-                    <label for="" class="control-label">Reason</label>
-                    <input type="text" class="form-control" v-model="dataShowDetail.reason" />
-                </div>
-                <div class="content">
                     <label for="" class="control-label">Size</label>
                     <input type="text" class="form-control" v-model="dataShowDetail.size" />
                 </div>
@@ -110,7 +105,7 @@
                         :clear-on-select="false" :preserve-search="true" :preselect-first="false">
                     </Multiselect>
                 </div>
-                <div class="content">
+                <div class="content w-100">
                     <label for="" class="control-label">image</label>
                     <input type="file" @change="onFileChange" id="uploadFile">
                 </div>
@@ -146,8 +141,9 @@ import Multiselect from 'vue-multiselect';
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
+import store from '../../store/index.js';
 
-const tableColumns = ["Id", "Name", "Image", "Title", "Price", "Ingredient", "Size", "Desription", "Category", "operation"];
+const tableColumns = ["STT", "Name", "Image", "Title", "Price", "Ingredient", "Size", "Category", "operation"];
 
 export default {
     components: {
@@ -182,10 +178,8 @@ export default {
                 image: null,
                 title: null,
                 decorate: null,
-                note: null,
                 size: null,
                 color: null,
-                reason: null,
             },
             pagination: {
                 path: "",
@@ -238,7 +232,7 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
         },
@@ -253,7 +247,7 @@ export default {
                     this.list_categorys = response.data.data.result;
                 })
                 .catch(function (error) {
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
 
@@ -271,16 +265,14 @@ export default {
                             image: response.data.data.image,
                             title: response.data.data.title,
                             decorate: response.data.data.decorate,
-                            note: response.data.data.note,
                             size: response.data.data.size,
                             color: response.data.data.color,
-                            reason: response.data.data.reason,
                         }
                         const image = document.getElementById("preview-image-edit");
                         image.src = '';
                     })
                     .catch(function (error) {
-                        this.$store.dispatch('auth/logout');
+                        store.dispatch('auth/logout');
                         location.reload();
                     });
             } else {
@@ -294,19 +286,16 @@ export default {
                     image: null,
                     title: null,
                     decorate: null,
-                    note: null,
                     size: null,
                     color: null,
-                    reason: null,
                 }
             }
             this.isLoading = false;
         },
         async createdItem() {
-            if (this.dataShowDetail.image == "" || this.dataShowDetail.image == null || this.dataShowDetail.listCategoryId == undefined) {
-                this.notifyVue('danger', 'Không thể thực hiện vui lòng kiểm tra lại!');
-                return;
-            }
+            if (this.isFormEmpty()) {
+                this.notifyVue('danger', 'Vui lòng nhập đầy đủ các trường trên để thực hiện bước tiếp theo!');
+            } 
             this.isLoading = true;
             const formData = new FormData();
             formData.append("file", this.dataShowDetail.image);
@@ -328,7 +317,7 @@ export default {
                         })
                         .catch(function (error) {
                             this.isLoading = false;
-                            this.$store.dispatch('auth/logout');
+                            store.dispatch('auth/logout');
                             location.reload();
                         });
                 }
@@ -343,7 +332,7 @@ export default {
                         })
                         .catch(function (error) {
                             this.isLoading = false;
-                            this.$store.dispatch('auth/logout');
+                            store.dispatch('auth/logout');
                             location.reload();
                         });
                 } else {
@@ -357,7 +346,7 @@ export default {
                             })
                             .catch(function (error) {
                                 this.isLoading = false;
-                                this.$store.dispatch('auth/logout');
+                                store.dispatch('auth/logout');
                                 location.reload();
                             });
                     }
@@ -397,7 +386,7 @@ export default {
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        this.$store.dispatch('auth/logout');
+                        store.dispatch('auth/logout');
                         location.reload();
                     });
             }
@@ -411,6 +400,10 @@ export default {
             } catch (e) {
                 console.log(e);
             }
+        },
+        isFormEmpty() {
+            const { name, price, ingredient, listCategoryId, current_image, image, title, decorate, size, color, } = this.dataShowDetail;
+            return !name || !price || !ingredient || !title || !image || !listCategoryId;
         },
         notifyVue(color, message) {
             this.$notify({
@@ -437,6 +430,12 @@ export default {
                 image.src = URL.createObjectURL(files[0]);
             }
             this.dataShowDetail.image = files[0];
+        },
+        formatMoney(amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
         },
         onPageChange(page) {
             this.searchData.page = page;

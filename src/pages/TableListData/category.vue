@@ -88,8 +88,9 @@ import Paginate from "./paginate.vue";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
+import store from '../../store/index.js';
 
-const tableColumns = ["Id", "Name", "Desription", "operation"];
+const tableColumns = ["STT", "Name", "Desription", "operation"];
 
 export default {
     components: {
@@ -159,7 +160,7 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
         },
@@ -169,7 +170,7 @@ export default {
                     this.dataShowDetail = response.data.data;
                 })
                 .catch(function (error) {
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
         },
@@ -193,6 +194,10 @@ export default {
             this.isLoading = false;
         },
         createdItem() {
+            if (this.isFormEmpty) {
+                this.notifyVue('danger', 'Vui lòng nhập đầy đủ các trường trên để thực hiện bước tiếp theo!');
+                return;
+            }
             this.isLoading = true;
             if (this.dataShowDetail.id == 0) {
                 this.axios.post('/api/category/create', this.dataShowDetail, this.config)
@@ -204,7 +209,7 @@ export default {
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        this.$store.dispatch('auth/logout');
+                        store.dispatch('auth/logout');
                         location.reload();
                     });
             } else {
@@ -217,7 +222,7 @@ export default {
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        this.$store.dispatch('auth/logout');
+                        store.dispatch('auth/logout');
                         location.reload();
                     });
             }
@@ -241,10 +246,14 @@ export default {
                     this.getAll();
                 })
                 .catch(function (error) {
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
             }
+        },
+        isFormEmpty() {
+            const { name, description } = this.dataShowDetail;
+            return !name || !description;
         },
         onPageChange(page) {
             this.searchData.page = page;

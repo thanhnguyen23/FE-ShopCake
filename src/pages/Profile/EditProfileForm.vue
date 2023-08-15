@@ -4,20 +4,12 @@
       <h5 class="title">Edit Profile</h5>
     </template>
     <div class="row">
-      <div class="col-md-5 pr-md-1 text-left">
-        <base-input
-          label="Company (disabled)"
-          placeholder="Company"
-          v-model="model.company"
-          disabled
-        >
-        </base-input>
-      </div>
-      <div class="col-md-3 px-md-1 text-left">
+      <div class="col-md-3 pr-md-1 text-left">
         <base-input
           label="Username"
-          placeholder="Username"
+          placeholder="mike"
           v-model="model.username"
+          disabled
         >
         </base-input>
       </div>
@@ -26,32 +18,41 @@
           label="Email address"
           type="email"
           placeholder="mike@email.com"
+          v-model="model.email"
         >
         </base-input>
       </div>
+
+      <div class="col-md-5 pr-md-1 text-left">
+          <base-input
+            label="Full Name"
+            v-model="model.fullName"
+            placeholder="mike andew"
+          >
+          </base-input>
+        </div>
     </div>
 
     <div class="row">
-      <div class="col-md-6 pr-md-1 text-left">
-        <base-input
-          label="First Name"
-          v-model="model.firstName"
-          placeholder="First Name"
-        >
-        </base-input>
-      </div>
-      <div class="col-md-6 pl-md-1 text-left">
-        <base-input
-          label="Last Name"
-          v-model="model.lastName"
-          placeholder="Last Name"
-        >
-        </base-input>
-      </div>
-    </div>
+      <div class="col-md-3 pr-md-1 text-left">
+          <base-input
+            label="Telephone"
+            placeholder="0123456789"
+            v-model="model.telephone"
+          >
+          </base-input>
+        </div>
+        <div class="col-md-4 pl-md-1 text-left">
+          <base-input
+            label="Birthday"
+            type="date"
+            placeholder="23-08-2005"
+            v-model="model.birthday"
+          >
+          </base-input>
+        </div>
 
-    <div class="row">
-      <div class="col-md-12 text-left">
+      <div class="col-md-5 pr-md-1 text-left">
         <base-input
           label="Address"
           v-model="model.address"
@@ -61,40 +62,8 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-md-4 pr-md-1 text-left">
-        <base-input label="City" v-model="model.city" placeholder="City">
-        </base-input>
-      </div>
-      <div class="col-md-4 px-md-1 text-left">
-        <base-input
-          label="Country"
-          v-model="model.country"
-          placeholder="Country"
-        >
-        </base-input>
-      </div>
-      <div class="col-md-4 pl-md-1 text-left">
-        <base-input label="Postal Code" placeholder="ZIP Code"> </base-input>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-8 text-left">
-        <base-input>
-          <label>About Me</label>
-          <textarea
-            rows="4"
-            cols="80"
-            class="form-control"
-            placeholder="Here can be your description"
-            v-model="model.about"
-          >
-          </textarea>
-        </base-input>
-      </div>
-    </div>
     <template slot="footer">
-      <base-button type="success" fill>Save</base-button>
+      <base-button type="success" fill @click="editProfileUser()">Save</base-button>
     </template>
   </card>
 </template>
@@ -102,6 +71,9 @@
 import { Card, BaseInput } from "@/components/index";
 
 import BaseButton from "@/components/BaseButton";
+import NotificationTemplate from "../Notifications/NotificationTemplate";
+import store from '../../store/index.js';
+import moment from 'moment';
 
 export default {
   components: {
@@ -115,6 +87,39 @@ export default {
       default: () => {
         return {};
       },
+    },
+  },
+  data() {
+    return {
+      config: {
+        headers: {
+          Authorization: 'Bearer ' + JSON.parse(localStorage.getItem('user')).accessToken,
+        },
+      },
+    }
+  },
+  methods: {
+    editProfileUser() {
+      this.model.birthday = moment(this.model.birthday).format('MM-DD-YYYY');
+      this.axios.post('/api/auth/update', this.model, this.config)
+        .then(response => {
+          this.notifyVue('success', 'Update user success');
+        })
+        .catch(function (error) {
+          // store.dispatch('auth/logout');
+          // location.reload();
+        });
+    },
+    notifyVue(color, message) {
+      this.$notify({
+        component: NotificationTemplate,
+        icon: "tim-icons icon-bell-55",
+        horizontalAlign: 'top',
+        verticalAlign: 'right',
+        type: color,
+        timeout: 3000,
+        message: message,
+      });
     },
   },
 };

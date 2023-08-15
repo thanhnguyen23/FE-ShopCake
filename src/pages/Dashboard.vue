@@ -48,7 +48,7 @@
                                 <td>{{ item.name  }}</td>
                                 <td>{{ item.email  }}</td>
                                 <td>{{ item.address  }}</td>
-                                <td>{{ item.totalMoney  }}</td>
+                                <td>{{ formatMoney(item.totalMoney) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -209,6 +209,12 @@ export default {
             this.$refs.bigChart.updateGradients(chartData);
             this.bigLineChart.chartData = chartData;
             this.bigLineChart.activeIndex = index;
+        },
+        formatMoney(amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
         },
     },
     mounted() {

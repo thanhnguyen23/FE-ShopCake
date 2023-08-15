@@ -36,9 +36,9 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in list_data" :key="index">
-                            <td>{{ index }}</td>
+                            <td>{{ index + 1 }}</td>
                             <td>{{ item.name }}</td>
-                            <td>{{ item.discount }}</td>
+                            <td>{{ formatMoney(item.discount) }}</td>
                             <td>{{ momentFormatDate(item.startDate) }}</td>
                             <td>{{ momentFormatDate(item.endDate) }}</td>
                             <td><button type="button" class="form-control" @click="addProductToPromotions(item.id, 1)">Add product</button></td>
@@ -52,7 +52,7 @@
                             </td>
                         </tr>
                         <tr v-if="list_data.length < 1">
-                            <td colspan="6">No data</td>
+                            <td colspan="7">No data</td>
                         </tr>
                     </tbody>
                 </table>
@@ -123,8 +123,9 @@ import Multiselect from 'vue-multiselect';
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
+import store from '../../store/index.js';
 
-const tableColumns = ["Id", "Name", "Discount", "Start Date", "End Date", "Add product", "operation"];
+const tableColumns = ["STT", "Name", "Discount", "Start Date", "End Date", "Add product", "operation"];
 
 export default {
     components: {
@@ -207,7 +208,7 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
         },
@@ -220,7 +221,7 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
         },
@@ -262,7 +263,7 @@ export default {
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        this.$store.dispatch('auth/logout');
+                        store.dispatch('auth/logout');
                         location.reload();
                     });
             } else {
@@ -275,7 +276,7 @@ export default {
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        this.$store.dispatch('auth/logout');
+                        store.dispatch('auth/logout');
                         location.reload();
                     });
             }
@@ -291,7 +292,7 @@ export default {
                     })
                     .catch(function (error) {
                         this.isLoading = false;
-                        this.$store.dispatch('auth/logout');
+                        store.dispatch('auth/logout');
                         location.reload();
                     });
             }
@@ -310,7 +311,7 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
         },  
@@ -327,7 +328,7 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
         },
@@ -345,6 +346,12 @@ export default {
         momentFormatDate(date) {
             return moment(date).format('YYYY-MM-DD hh:mm');
         },
+        formatMoney(amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
+        },
         onPageChange(page) {
             this.searchData.page = page;
             this.getAll();
@@ -355,6 +362,11 @@ export default {
 </script>
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style>
+.modal-dialog {
+    overflow-x: visible !important;
+}
+</style>
 <style scoped>
 button:focus {
     outline: none;

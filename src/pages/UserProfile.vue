@@ -24,23 +24,48 @@ export default {
   data() {
     return {
       model: {
-        company: "Creative Code Inc.",
+        id: 0,
         email: "mike@email.com",
         username: "michael23",
-        firstName: "Mike",
-        lastName: "Andrew",
+        fullName: "Mike Andrew",
         address: "Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09",
-        city: "Melbourne",
-        country: "Australia",
-        about:
-          "Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo.",
+        telephone: "0139234324",
+        birthday: "23-08-2005"
       },
       user: {
         fullName: "Mike Andrew",
-        title: "Ceo/Co-Founder",
-        description: `Do not be scared of the truth because we need to restart the human foundation in truth And I love you like Kanye loves Kanye I love Rick Owens’ bed design but the back is...`,
+        email: "Ceo/Co-Founder",
+      },
+      config: {
+        headers: {
+          Authorization: 'Bearer ' + JSON.parse(localStorage.getItem('user')).accessToken,
+        },
       },
     };
+  },
+  created() {
+    this.getUserDetail();
+  },
+  methods: {
+    getUserDetail() {
+      this.axios.get('/api/auth/detail', this.config)
+        .then(response => {
+          this.model.id = response.data.id;
+          this.model.email = response.data.email;
+          this.model.username = response.data.username;
+          this.model.fullName = response.data.fullName;
+          this.model.address = response.data.address;
+          this.model.telephone = response.data.telephone;
+          this.model.birthday = response.data.birthday;
+
+          this.user.fullName = response.data.fullName;
+          this.user.email = response.data.email;
+        })
+        .catch(function (error) {
+          store.dispatch('auth/logout');
+          location.reload();
+        });
+    }
   },
 };
 </script>

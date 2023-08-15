@@ -44,7 +44,7 @@
                     </thead>
                     <tbody>
                         <tr v-for="(item, index) in list_data" :key="index">
-                            <td>{{ index }}</td>
+                            <td>{{ index+1 }}</td>
                             <td>{{ item.name }}</td>
                             <td>{{ item.email }}</td>
                             <td>{{ item.deliveryAddress }}</td>
@@ -96,7 +96,7 @@
                             <td style="width: 10%;"><img :src="urlImage + item.image" alt=""></td>
                             <td>{{ item.nameCake }}</td>
                             <td>{{ item.quantity }}</td>
-                            <td>{{ item.price }}</td>
+                            <td>{{ formatMoney(item.price) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -117,8 +117,9 @@ import moment from 'moment';
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
 import NotificationTemplate from "../Notifications/NotificationTemplate";
+import store from '../../store/index.js';
 
-const tableColumns = ["Id", "User Name", "Email", "Delivery Address", "phone", "deliveryDate", "Detail", "status", "operation"];
+const tableColumns = ["STT", "User Name", "Email", "Delivery Address", "phone", "deliveryDate", "Detail", "status", "operation"];
 const tableColumns_dataDetail = ["Image","Product Name", "Quantity", "Price"];
 
 export default {
@@ -200,8 +201,8 @@ export default {
                 this.isLoading = false;
             })
             .catch(function (error) {
-                this.$store.dispatch('auth/logout');
-      location.reload();
+                store.dispatch('auth/logout');
+                location.reload();
             });
         },
         getDataDetail(id) {
@@ -210,7 +211,7 @@ export default {
                 this.dataShowDetail = response.data.data.detailDtoList;
             })
             .catch(function (error) {
-                this.$store.dispatch('auth/logout');
+                store.dispatch('auth/logout');
                     location.reload();
             });
         },
@@ -219,6 +220,8 @@ export default {
                 if (confirm("Bạn có chắn chắn muốn hủy đơn hàng này không")) {
                     this.changeStatusOrder(id,status);
                 }
+            } else {
+                this.changeStatusOrder(id, status);
             }
             
         },
@@ -231,7 +234,7 @@ export default {
                 })
                 .catch(function (error) {
                     this.isLoading = false;
-                    this.$store.dispatch('auth/logout');
+                    store.dispatch('auth/logout');
                     location.reload();
                 });
             this.getAll();
@@ -263,6 +266,12 @@ export default {
         },
         momentFormatDate(date) {
             return moment(date).format('YYYY-MM-DD hh:mm');
+        },
+        formatMoney(amount) {
+            return amount.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
         },
         showModalDataDetail(id) {
             this.isLoading = true;
