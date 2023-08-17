@@ -100,14 +100,15 @@ export default {
   },
   methods: {
     editProfileUser() {
-      this.model.birthday = moment(this.model.birthday).format('MM-DD-YYYY');
+      this.model.birthday = moment(this.model.birthday).format('DD-MM-YYYY');
       this.axios.post('/api/auth/update', this.model, this.config)
         .then(response => {
           this.notifyVue('success', 'Update user success');
+          location.reload();
         })
         .catch(function (error) {
-          // store.dispatch('auth/logout');
-          // location.reload();
+          store.dispatch('auth/logout');
+          location.reload();
         });
     },
     notifyVue(color, message) {

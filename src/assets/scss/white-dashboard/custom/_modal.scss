@@ -164,7 +164,11 @@
   }
 }
 .model-detail .modal-dialog {
-  max-width: 1200px;
+  max-width: 1000px;
   max-height: 400px;
   overflow-x: auto;
+}
+
+#addProduct > .modal-dialog {
+  overflow-x: visible;
 }

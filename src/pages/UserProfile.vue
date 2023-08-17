@@ -13,6 +13,7 @@
 <script>
 import EditProfileForm from "./Profile/EditProfileForm.vue";
 import UserCard from "./Profile/UserCard.vue";
+import moment from 'moment';
 
 export default {
   watch: {
@@ -30,7 +31,7 @@ export default {
         fullName: "Mike Andrew",
         address: "Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09",
         telephone: "0139234324",
-        birthday: "23-08-2005"
+        birthday: "2005-08-23"
       },
       user: {
         fullName: "Mike Andrew",
@@ -52,6 +53,12 @@ export default {
     this.getUserDetail();
   },
   methods: {
+    formattedDate(date) {
+      let parsedDate = moment(date, "DD-MM-YYYY");
+      let formattedDateStr = parsedDate.format("YYYY-MM-DD");
+
+      return formattedDateStr;
+    },
     getUserDetail() {
       this.axios.get('/api/auth/detail', this.config)
         .then(response => {
@@ -61,12 +68,12 @@ export default {
           this.model.fullName = response.data.fullName;
           this.model.address = response.data.address;
           this.model.telephone = response.data.telephone;
-          this.model.birthday = response.data.birthday;
-
+          this.model.birthday = this.formattedDate(response.data.birthday);
           this.user.fullName = response.data.fullName;
           this.user.email = response.data.email;
         })
         .catch(function (error) {
+          console.log(error);
           store.dispatch('auth/logout');
           location.reload();
         });
