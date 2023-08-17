@@ -19,10 +19,10 @@
             <div class="d-flex">
                 <div class="detail">
                     <button type="button" class="form-control" style="background: #28a745;"
-                        @click="showModalDataDetail()">Add promotions</button>
+                        @click="showModalDataDetail()">Thêm promotions</button>
                 </div>
                 <div class="detail">
-                    <button type="button" class="form-control" @click="getAll()">Filter data</button>
+                    <button type="button" class="form-control" @click="getAll()">Lọc dữ liệu</button>
                 </div>
             </div>
         </div>
