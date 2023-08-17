@@ -172,3 +172,7 @@
 #addProduct > .modal-dialog {
   overflow-x: visible;
 }
+
+#reasonCancelOrder >.modal-dialog {
+  max-width: 500px;
+}

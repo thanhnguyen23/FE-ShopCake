@@ -102,6 +102,14 @@
                 </table>
             </div>
         </modal>
+
+        <modal :show.sync="reasonCancelOrder" class="model-detail" id="reasonCancelOrder" :centered="false" :show-close="true">
+                <div class="show-data-detail">
+                    <label id="">Nhập lý do hủy đơn</label>
+                    <textarea class="form-control" rows="3" placeholder="Nhập ở đây..." v-model="data_reason_cancel_order.reason"></textarea>
+                    <button type="button" class="btn mt-2" @click="cancelOrder()">Submit</button>
+                </div>
+            </modal>
     </div>
 </template>
 
@@ -135,6 +143,12 @@ export default {
             isLoading: false,
             urlImage: "http://103.187.5.254:8090/api/files/files/",
             searchModalVisible: false,
+            reasonCancelOrder: false,
+            data_reason_cancel_order: {
+                id: 0,
+                status: null,
+                reason: null,
+            },
             tableColumns: tableColumns,
             tableColumns_dataDetail: tableColumns_dataDetail,
             list_data: [],
@@ -217,18 +231,22 @@ export default {
         },
         updateStatusOrder(id, status) {
             if (status == "từ chối") {
-                if (confirm("Bạn có chắn chắn muốn hủy đơn hàng này không")) {
-                    this.changeStatusOrder(id,status);
-                }
+                this.reasonCancelOrder = true;
+                this.data_reason_cancel_order.id = id;
+                this.data_reason_cancel_order.status = status;
             } else {
                 this.changeStatusOrder(id, status);
             }
             
         },
+        cancelOrder() {
+            this.changeStatusOrder(this.data_reason_cancel_order.id, this.data_reason_cancel_order.status);
+        },
         changeStatusOrder(id, status) {
             this.isLoading = true;
-            this.axios.post(`/api/order/procedure/${id}`, { procedure: `${status}` }, this.config)
+            this.axios.post(`/api/order/procedure/${id}`, { procedure: `${status}`, reason: this.data_reason_cancel_order.reason }, this.config)
                 .then(response => {
+                    this.reasonCancelOrder = false;
                     this.notifyVue('success', 'Chuyển trạng thái thành công');
                     this.getAll();
                 })
