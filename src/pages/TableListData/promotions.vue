@@ -38,7 +38,7 @@
                         <tr v-for="(item, index) in list_data" :key="index">
                             <td>{{ index + 1 }}</td>
                             <td>{{ item.name }}</td>
-                            <td>{{ formatMoney(item.discount) }}</td>
+                            <td>{{ item.discount }}</td>
                             <td>{{ momentFormatDate(item.startDate) }}</td>
                             <td>{{ momentFormatDate(item.endDate) }}</td>
                             <td><button type="button" class="form-control" @click="addProductToPromotions(item.id, 1)">Add product</button></td>
@@ -331,6 +331,18 @@ export default {
                     store.dispatch('auth/logout');
                     location.reload();
                 });
+
+            this.axios.get(`/api/cake/getCakeByPromotion?promotionId=${id}`, this.config)
+                .then(res => {
+                    this.list_product_add = res.data.data;
+                    this.list_product.push(res.data.data);
+                    this.isLoading = false;
+                })
+                .catch(function (error) {
+                    this.isLoading = false;
+                    store.dispatch('auth/logout');
+                    location.reload();
+                });
         },
         notifyVue(color, message) {
             this.$notify({
@@ -362,11 +374,6 @@ export default {
 </script>
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
-<style>
-.modal-dialog {
-    overflow-x: visible !important;
-}
-</style>
 <style scoped>
 button:focus {
     outline: none;

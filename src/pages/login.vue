@@ -77,7 +77,6 @@ export default {
                     return;
                 }
 
-                console.log(this.user);
                 if (this.user.username && this.user.password) {
                     this.$store.dispatch('auth/login', this.user).then(
                         () => {
@@ -85,6 +84,7 @@ export default {
                         },
                         error => {
                             this.loading = false;
+                            this.$router.push('/login');
                             this.message =
                                 (error.response && error.response.data) ||
                                 error.message ||

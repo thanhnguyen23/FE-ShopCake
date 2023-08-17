@@ -10,6 +10,11 @@ class AuthService {
                 password: user.password
             })
             .then(response => {
+                if (response.data.roles.indexOf("ROLE_ADMIN") == -1) {
+                    localStorage.removeItem('user');
+                    return error;
+                }
+
                 if (response.data.accessToken) {
                     localStorage.setItem('user', JSON.stringify(response.data));
                 }

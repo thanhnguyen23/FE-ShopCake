@@ -159,9 +159,11 @@ export default {
             this.initBigChart(0, completedCount);
         },
         getDataTableTopUser() {
+            var current_date = new Date();
+            var current_month = current_date.getMonth();
             const data_search = {
-                "fromDate": "01-07-2023",
-                "toDate": "01-08-2023",
+                "fromDate": `01-0${current_month + 1}-2023`,
+                "toDate": `29-0${current_month + 1}-2023`,
                 "status": 3,
                 "limit": 10
             };

@@ -105,7 +105,14 @@
                         :clear-on-select="false" :preserve-search="true" :preselect-first="false">
                     </Multiselect>
                 </div>
-                <div class="content w-100">
+                <div class="content">
+                    <label for="" class="control-label">Type product</label>
+                    <select class="form-control">
+                        <option value="1">Sản phẩm đặc biệt</option>
+                        <option value="0">Sản phẩm thường</option>
+                    </select>
+                </div>
+                <div class="content">
                     <label for="" class="control-label">image</label>
                     <input type="file" @change="onFileChange" id="uploadFile">
                 </div>
@@ -180,6 +187,7 @@ export default {
                 decorate: null,
                 size: null,
                 color: null,
+                special: 0,
             },
             pagination: {
                 path: "",
@@ -267,6 +275,7 @@ export default {
                             decorate: response.data.data.decorate,
                             size: response.data.data.size,
                             color: response.data.data.color,
+                            special: response.data.data.special,
                         }
                         const image = document.getElementById("preview-image-edit");
                         image.src = '';
@@ -288,6 +297,7 @@ export default {
                     decorate: null,
                     size: null,
                     color: null,
+                    special: 0,
                 }
             }
             this.isLoading = false;
@@ -295,6 +305,7 @@ export default {
         async createdItem() {
             if (this.isFormEmpty()) {
                 this.notifyVue('danger', 'Vui lòng nhập đầy đủ các trường trên để thực hiện bước tiếp theo!');
+                return;
             } 
             this.isLoading = true;
             const formData = new FormData();
