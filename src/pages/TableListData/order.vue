@@ -224,7 +224,8 @@ export default {
                 .then(response => {
                 this.dataShowDetail = response.data.data.detailDtoList;
             })
-            .catch(function (error) {
+                .catch(function (error) {
+                    console.log(error);
                 store.dispatch('auth/logout');
                     location.reload();
             });

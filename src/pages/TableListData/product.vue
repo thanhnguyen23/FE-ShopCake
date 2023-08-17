@@ -278,11 +278,11 @@ export default {
                             special: response.data.data.special,
                         }
                         const image = document.getElementById("preview-image-edit");
-                        image.src = '';
+                        image.src = "";
                     })
                     .catch(function (error) {
-                        store.dispatch('auth/logout');
-                        location.reload();
+                        // store.dispatch('auth/logout');
+                        // location.reload();
                     });
             } else {
                 this.dataShowDetail = {
