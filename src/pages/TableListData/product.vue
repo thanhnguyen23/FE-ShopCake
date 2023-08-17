@@ -71,19 +71,19 @@
         <modal :show.sync="searchModalVisible" class="model-detail" id="editItem" :centered="false" :show-close="true">
             <div class="show-data-detail">
                 <div class="content">
-                    <label for="" class="control-label">Name</label>
+                    <label for="" class="control-label">Name <span style="color: red">*</span></label>
                     <input type="text" class="form-control" v-model="dataShowDetail.name" />
                 </div>
                 <div class="content">
-                    <label for="" class="control-label">Title</label>
+                    <label for="" class="control-label">Title <span style="color: red">*</span></label>
                     <input type="text" class="form-control" v-model="dataShowDetail.title" />
                 </div>
                 <div class="content">
-                    <label for="" class="control-label">Price</label>
+                    <label for="" class="control-label">Price <span style="color: red">*</span></label>
                     <input type="number" class="form-control" v-model="dataShowDetail.price" />
                 </div>
                 <div class="content">
-                    <label for="" class="control-label">Ingredient</label>
+                    <label for="" class="control-label">Ingredient <span style="color: red">*</span></label>
                     <input type="text" class="form-control" v-model="dataShowDetail.ingredient" />
                 </div>
                 <div class="content">
@@ -99,7 +99,7 @@
                     <input type="text" class="form-control" v-model="dataShowDetail.size" />
                 </div>
                 <div class="content">
-                    <label for="" class="control-label">Category</label>
+                    <label for="" class="control-label">Category <span style="color: red">*</span></label>
                     <Multiselect v-model="dataShowDetail.listCategoryId" :options="list_categorys"
                         placeholder="Chọn thể loại" label="name" track-by="id" :multiple="true" :close-on-select="false"
                         :clear-on-select="false" :preserve-search="true" :preselect-first="false">
@@ -113,7 +113,7 @@
                     </select>
                 </div>
                 <div class="content">
-                    <label for="" class="control-label">image</label>
+                    <label for="" class="control-label">image <span style="color: red">*</span></label>
                     <input type="file" @change="onFileChange" id="uploadFile">
                 </div>
                 <div class="content">

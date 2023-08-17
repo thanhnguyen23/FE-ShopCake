@@ -58,11 +58,11 @@
         <modal :show.sync="searchModalVisible" class="model-detail" id="editItem" :centered="false" :show-close="true">
             <div class="show-data-detail">
                 <div class="content">
-                    <label for="" class="control-label">Name</label>
+                    <label for="" class="control-label">Name <span style="color: red">*</span></label>
                     <input type="text" class="form-control" v-model="dataShowDetail.name" />
                 </div>
                 <div class="content">
-                        <label for="" class="control-label">Desription</label>
+                        <label for="" class="control-label">Desription <span style="color: red">*</span></label>
                         <input type="text" class="form-control" v-model="dataShowDetail.description" />
                     </div>
                 <div class="content" style="display: inline-block;align-self: flex-end;">
