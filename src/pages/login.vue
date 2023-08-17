@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import NotificationTemplate from "./Notifications/NotificationTemplate";
 export default {
     name: 'Login',
     data() {
@@ -81,10 +82,12 @@ export default {
                     this.$store.dispatch('auth/login', this.user).then(
                         () => {
                             this.$router.push('/dashboard');
+                            this.notifyVue('success', 'Đăng nhập thành công!');
                         },
                         error => {
                             this.loading = false;
                             this.$router.push('/login');
+                            this.notifyVue('danger', 'Đăng nhập thất bại!');
                             this.message =
                                 (error.response && error.response.data) ||
                                 error.message ||
@@ -93,7 +96,18 @@ export default {
                     );
                 }
             });
-        }
+        },
+        notifyVue(color, message) {
+            this.$notify({
+                component: NotificationTemplate,
+                icon: "tim-icons icon-bell-55",
+                horizontalAlign: 'top',
+                verticalAlign: 'right',
+                type: color,
+                timeout: 3000,
+                message: message,
+            });
+        },
     }
 };
 </script>
